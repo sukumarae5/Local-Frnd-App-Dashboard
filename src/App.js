@@ -1,16 +1,19 @@
 import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Dashboard from "./pages/dashboard/Dashboard";
 import UserListPage from "./pages/users/UsersListPage";
-import { BrowserRouter, Route, Router, Routes } from "react-router-dom";
-const App=()=>{
-  return(
-    <div>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/UserListPage" element={<UserListPage/>}/>
-        </Routes>
-      </BrowserRouter>
-    </div>
-  )
 
-}
+const App = () => {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard />}>
+          <Route path="userlistpage" element={<UserListPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/dashboard/userlistpage" />} />
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
 export default App;
