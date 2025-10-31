@@ -2,7 +2,7 @@
 import React from "react";
 import { Badge } from "react-bootstrap";
 import AppTable from "../../components/tables/AppTable";
-import AppButton from "../../components/button/AppButton"; // import here
+import AppButton from "../../components/button/AppButton";
 
 const users = [
   { id: 1, name: "Alice Johnson", email: "alice@example.com", role: "Admin", status: "Active" },
@@ -46,8 +46,48 @@ const UserListPage = () => {
   ];
 
   return (
-    <div className="p-3">
-      <AppTable columns={columns} data={users} />
+    <div className="p-3 userlist-container">
+      <div className="table-responsive">
+        <AppTable columns={columns} data={users} />
+      </div>
+
+      {/* ✅ Responsive Table CSS */}
+      <style>{`
+        .userlist-container {
+          background-color: #f8f9fa;
+          border-radius: 10px;
+          padding: 20px;
+        }
+
+        .table-responsive {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        th, td {
+          white-space: nowrap;
+          text-align: left;
+        }
+
+        /* ✅ Mobile View (only horizontal scroll) */
+        @media (max-width: 768px) {
+          .table-responsive {
+            margin-left: 0 !important;
+            border-radius: 6px;
+            box-shadow: 0 0 4px rgba(0,0,0,0.1);
+          }
+
+          table {
+            display: table;
+            width: max-content; /* Keeps full table visible with scroll */
+          }
+        }
+      `}</style>
     </div>
   );
 };
