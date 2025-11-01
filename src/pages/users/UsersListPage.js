@@ -2,12 +2,18 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { userFetchRequest } from "../../features/user/userAction";
 import AppTable from "../../components/tables/AppTable";
-import AppButton from "../../components/button/AppButton"; // ✅ corrected folder name (buttons)
+import { AppAddButton, AppButtonRow } from "../../components/button/AppButton"; // ✅ correct path & names
+import AppPagination from "../../components/pagination/AppPagination";
+import { FaSearch } from "react-icons/fa";
 
 const UserListPage = () => {
   const [q, setQ] = useState("");
-  const dispatch = useDispatch();
 
+  // ✅ Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const dispatch = useDispatch();
   const { loading, user, error } = useSelector((s) => s.user || {});
   const users = Array.isArray(user) ? user : [];
 
@@ -15,26 +21,27 @@ const UserListPage = () => {
     dispatch(userFetchRequest()); // initial load
   }, [dispatch]);
 
+  // Reset to page 1 when list length changes (new fetch or new search results)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [users.length]);
+
   const onSearch = (e) => {
     e.preventDefault();
+    setCurrentPage(1);           // ✅ go back to first page on new search
     dispatch(userFetchRequest(q));
   };
 
-  // Handlers for button actions
-  const handleView = (row) => {
-    alert(`Viewing user: ${row.firstName} ${row.lastName}`);
-  };
-
-  const handleEdit = (row) => {
-    alert(`Editing user: ${row.firstName} ${row.lastName}`);
-  };
-
+  // Row action handlers
+  const handleView = (row) => alert(`Viewing user: ${row.firstName} ${row.lastName}`);
+  const handleEdit = (row) => alert(`Editing user: ${row.firstName} ${row.lastName}`);
   const handleDelete = (row) => {
-    const confirmDelete = window.confirm(`Are you sure to delete ${row.firstName}?`);
-    if (confirmDelete) alert(`Deleted user: ${row.firstName}`);
+    const ok = window.confirm(`Are you sure to delete ${row.firstName}?`);
+    if (ok) alert(`Deleted user: ${row.firstName}`);
   };
+  const handleAddUser = () => alert("Add new user form or modal can open here.");
 
-  // ✅ Define table columns with inline Action buttons
+  // Columns
   const columns = useMemo(
     () => [
       { key: "id", label: "ID" },
@@ -54,8 +61,8 @@ const UserListPage = () => {
         key: "actions",
         label: "Actions",
         render: (row) => (
-          <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
-            <AppButton
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <AppButtonRow
               onView={() => handleView(row)}
               onEdit={() => handleEdit(row)}
               onDelete={() => handleDelete(row)}
@@ -67,48 +74,91 @@ const UserListPage = () => {
     []
   );
 
+  // ✅ Client-side pagination slice
+  const pagedUsers = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return users.slice(start, start + itemsPerPage);
+  }, [users, currentPage]);
+
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-      <h2 style={{ margin: "1rem 0" }}>User List</h2>
+      <h2 style={{ margin: "1rem 0", marginLeft: "300px" }}>User List</h2>
 
-      {/* 🔍 Search Bar */}
-      <form onSubmit={onSearch} style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search name/email..."
+      {/* 🔍 Search (left) + Add (right) */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 12,
+          paddingRight: 24,
+          paddingLeft: 24,
+        }}
+      >
+        {/* Search */}
+        <form
+          onSubmit={onSearch}
           style={{
-            flex: 1,
-            padding: "0.6rem 0.8rem",
-            borderRadius: 8,
-            border: "1px solid #ced4da",
-          }}
-        />
-        <button
-          type="submit"
-          style={{
-            padding: "0.6rem 1rem",
-            borderRadius: 8,
-            border: "1px solid #0d6efd",
-            background: "#0d6efd",
-            color: "white",
-            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            width: 250,
+            position: "relative",
           }}
         >
-          Search
-        </button>
-      </form>
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search..."
+            aria-label="Search users"
+            style={{
+              width: "100%",
+              padding: "0.45rem 2rem 0.45rem 0.8rem",
+              borderRadius: 8,
+              border: "1px solid #ced4da",
+              fontSize: "0.9rem",
+            }}
+          />
+          <FaSearch
+            style={{
+              position: "absolute",
+              right: 10,
+              color: "#6c757d",
+              fontSize: "0.9rem",
+              pointerEvents: "none",
+            }}
+          />
+        </form>
 
-      {/* 🧾 Table Display */}
+        {/* Add User (top-right) */}
+        <AppAddButton onAdd={handleAddUser} />
+      </div>
+
+      {/* 🧾 Table */}
       {loading && <p>Loading…</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       {!loading && !error && (
-        <AppTable
-          columns={columns}
-          data={users}
-          tableProps={{ size: "sm" }}
-        />
+        <>
+          <AppTable columns={columns} data={pagedUsers} tableProps={{ size: "sm" }} />
+
+          {/* Page info (optional) */}
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginTop: 8, padding: "0 24px" }}>
+            <span style={{ opacity: 0.8 }}>
+              Showing{" "}
+              {users.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} -{" "}
+              {Math.min(currentPage * itemsPerPage, users.length)} of {users.length}
+            </span>
+          </div>
+
+          {/* 📄 Pagination */}
+          <AppPagination
+            totalItems={users.length}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
+        </>
       )}
     </div>
   );
