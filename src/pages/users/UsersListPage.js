@@ -2,11 +2,18 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { userFetchRequest } from "../../features/user/userAction";
 import AppTable from "../../components/tables/AppTable";
-import AppButton from "../../components/button/AppButton";
+import { AppAddButton, AppButtonRow } from "../../components/button/AppButton";
+import AppPagination from "../../components/pagination/AppPagination";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 const UserListPage = () => {
   const [q, setQ] = useState("");
   const [screenSize, setScreenSize] = useState("desktop");
+
+  // ✅ Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const dispatch = useDispatch();
   const { loading, user, error } = useSelector((s) => s.user || {});
   const users = Array.isArray(user) ? user : [];
@@ -14,8 +21,9 @@ const UserListPage = () => {
   // ✅ Detect screen size
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth <= 576) setScreenSize("mobile");
-      else if (window.innerWidth <= 992) setScreenSize("tablet");
+      const width = window.innerWidth;
+      if (width <= 576) setScreenSize("mobile");
+      else if (width <= 992) setScreenSize("tablet");
       else setScreenSize("desktop");
     };
     handleResize();
@@ -28,23 +36,34 @@ const UserListPage = () => {
     dispatch(userFetchRequest());
   }, [dispatch]);
 
-  // ✅ Disable body scroll
+  // ✅ Reset pagination when data changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [users.length]);
+
+  // ✅ Disable body scroll to prevent double scrollbars
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => (document.body.style.overflow = "auto");
   }, []);
 
-  // ✅ Search handler
-  const onSearch = (e) => {
-    e.preventDefault();
-    dispatch(userFetchRequest(q));
-  };
+  // ✅ Search handler (auto search when typing)
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      dispatch(userFetchRequest(q));
+    }, 400);
+    return () => clearTimeout(delay);
+  }, [q, dispatch]);
 
   // ✅ Table actions
-  const handleView = (row) => alert(`Viewing user: ${row.firstName}`);
-  const handleEdit = (row) => alert(`Editing user: ${row.firstName}`);
-  const handleDelete = (row) =>
-    window.confirm(`Delete ${row.firstName}?`) && alert(`Deleted ${row.firstName}`);
+  const handleView = (row) => alert(`Viewing user: ${row.firstName} ${row.lastName}`);
+  const handleEdit = (row) => alert(`Editing user: ${row.firstName} ${row.lastName}`);
+  const handleDelete = (row) => {
+    if (window.confirm(`Are you sure to delete ${row.firstName}?`)) {
+      alert(`Deleted user: ${row.firstName}`);
+    }
+  };
+  const handleAddUser = () => alert("Add new user form or modal can open here.");
 
   // ✅ Table columns
   const columns = useMemo(
@@ -57,170 +76,175 @@ const UserListPage = () => {
       {
         key: "actions",
         label: "Actions",
-        render: (r) => (
-          <AppButton
-            onView={() => handleView(r)}
-            onEdit={() => handleEdit(r)}
-            onDelete={() => handleDelete(r)}
-          />
+        render: (row) => (
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <AppButtonRow
+              onView={() => handleView(row)}
+              onEdit={() => handleEdit(row)}
+              onDelete={() => handleDelete(row)}
+            />
+          </div>
         ),
       },
     ],
     []
   );
 
-  // ✅ Responsive container styling
+  // ✅ Layout container (responsive)
   const containerStyles = {
     position: "fixed",
-    top:
-      screenSize === "mobile"
-        ? "210px" // 📱 more top gap for mobile
-        : screenSize === "tablet"
-        ? "200px"
-        : "210px", // 💻 even more top gap for desktop
+    top: screenSize === "mobile" ? "200px" : screenSize === "tablet" ? "200px" : "230px",
+    left: screenSize === "mobile" ? "100px" : screenSize === "tablet" ? "100px" : "280px",
+    right: screenSize === "mobile" ? "20px" : screenSize === "tablet" ? "40px" : "60px",
     bottom: "20px",
-    left:
-      screenSize === "mobile"
-        ? "100px"
-        : screenSize === "tablet"
-        ? "100px"
-        : "280px",
-    right:
-      screenSize === "mobile"
-        ? "20px"
-        : screenSize === "tablet"
-        ? "20px"
-        : "60px",
-    backgroundColor: "#f7f7f7ff",
+    backgroundColor: "#f7f7f7",
     borderRadius: screenSize === "mobile" ? "8px" : "12px",
     boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
     padding:
       screenSize === "mobile"
-        ? "14px"
+        ? "16px"
         : screenSize === "tablet"
         ? "20px 26px"
         : "26px 36px",
-    overflow: "hidden",
+    overflow: "auto",
     display: "flex",
     flexDirection: "column",
     transition: "all 0.3s ease",
   };
 
-  // ✅ Page background with top padding for all devices
+  // ✅ Page background
   const pageBackground = {
     position: "absolute",
-    top:
-      screenSize === "mobile"
-        ? "20px"
-        : screenSize === "tablet"
-        ? "30px"
-        : "60px", // 🖥️ Add more space only on desktop
+    top: screenSize === "desktop" ? "80px" : "40px",
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "#f8f9fcff",
-    overflow: "hidden",
+    backgroundColor: "#f8f9fc",
   };
 
-  return (
-    <div style={pageBackground}>
-      <div style={containerStyles}>
-        <h4
-          style={{
-            fontWeight: 600,
-            fontSize: screenSize === "mobile" ? "1.1rem" : "1.25rem",
-            marginBottom: "15px",
-            textAlign: screenSize === "mobile" ? "center" : "left",
-            position: "sticky",
-            top: "0",
-            background: "#f9f7f7ff",
-            zIndex: 2,
-            paddingBottom: "10px",
-            borderBottom: "2px solid #eee",
-          }}
-        >
-          User List
-        </h4>
+  // ✅ Pagination slice
+  const pagedUsers = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return users.slice(start, start + itemsPerPage);
+  }, [users, currentPage]);
 
-        <form
-          onSubmit={onSearch}
+  return (
+    <div style={pageBackground} >
+      <div style={containerStyles}>
+        {/* ✅ Header */}
+        <div
           style={{
             display: "flex",
-            flexDirection: screenSize === "mobile" ? "column" : "row",
+            justifyContent:
+              screenSize === "mobile" ? "center" : "space-between",
             alignItems: "center",
-            justifyContent: screenSize === "mobile" ? "center" : "flex-start",
-            gap: "10px",
-            marginBottom: "16px",
-            position: "sticky",
-            top: "40px",
-            background: "#f9f9f9ff",
-            zIndex: 2,
+            marginBottom: "10px",
+            borderBottom: "2px solid #eee",
             paddingBottom: "10px",
+            flexDirection: screenSize === "mobile" ? "column" : "row",
           }}
         >
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search name/email..."
+          <h4
             style={{
-              flex: 1,
-              width: screenSize === "mobile" ? "100%" : "auto",
-              minWidth: "200px",
-              padding: "8px 10px",
-              borderRadius: 8,
-              border: "2px solid #ced4da",
-              fontSize: "0.95rem",
+              fontWeight: 600,
+              fontSize: screenSize === "mobile" ? "1.1rem" : "1.25rem",
+              marginBottom: screenSize === "mobile" ? "10px" : "0",
+              textAlign: screenSize === "mobile" ? "center" : "left",
             }}
-          />
-          <button
-            type="submit"
+          >
+            User List
+          </h4>
+
+          {/* ✅ Search & Add User Row */}
+          <div
             style={{
-              padding: "8px 16px",
-              borderRadius: 8,
-              border: "none",
-              background: "#538ee6ff",
-              color: "white",
-              cursor: "pointer",
-              fontWeight: 500,
-              fontSize: "0.95rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent:
+                screenSize === "mobile" ? "center" : "flex-end",
+              gap: "12px",
               width: screenSize === "mobile" ? "100%" : "auto",
             }}
           >
-            Search
-          </button>
-        </form>
+            {/* Search Box */}
+            <div
+              style={{
+                position: "relative",
+                width: screenSize === "mobile" ? "100%" : "220px",
+              }}
+            >
+              <i
+                className="bi bi-search"
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "10px",
+                  transform: "translateY(-50%)",
+                  color: "#888",
+                  fontSize: "1rem",
+                }}
+              ></i>
+              <input
+                type="text"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search..."
+                style={{
+                  width: "100%",
+                  padding: "6px 10px 6px 30px",
+                  borderRadius: "8px",
+                  border: "2px solid #ced4da",
+                  fontSize: "0.9rem",
+                }}
+              />
+            </div>
 
-        <div
-          style={{
-            flex: 1,
-            overflowY: "auto",
-            overflowX: "auto",
-            border: "1px solid #eee",
-            borderRadius: "8px",
-            padding: "8px",
-            scrollbarWidth: "thin",
-            WebkitOverflowScrolling: "touch",
-            backgroundColor: "#ffffff",
-          }}
-        >
-          {loading && <p>Loading…</p>}
-          {error && <p style={{ color: "red" }}>{error}</p>}
-          {!loading && !error && users.length > 0 && (
+            {/* Add User Button */}
+            <AppAddButton onAdd={handleAddUser} />
+          </div>
+        </div>
+
+        {/* ✅ Table Section */}
+        {loading && <p>Loading…</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
+        {!loading && !error && (
+          <>
             <AppTable
               columns={columns}
-              data={users}
+              data={pagedUsers}
               tableProps={{
-                bordered: true,
+                size: screenSize === "mobile" ? "sm" : "md",
                 responsive: true,
-                style: {
-                  width: "100%",
-                  minWidth: screenSize === "mobile" ? "600px" : "100%",
-                  whiteSpace: "nowrap",
-                },
               }}
             />
-          )}
-        </div>
+
+            {/* ✅ Page Info */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                fontSize: 12,
+                marginTop: 8,
+                padding: "0 10px",
+              }}
+            >
+              <span style={{ opacity: 0.8 }}>
+                Showing{" "}
+                {users.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} -{" "}
+                {Math.min(currentPage * itemsPerPage, users.length)} of {users.length}
+              </span>
+            </div>
+
+            {/* ✅ Pagination */}
+            <AppPagination
+              totalItems={users.length}
+              itemsPerPage={itemsPerPage}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+            />
+          </>
+        )}
       </div>
     </div>
   );
