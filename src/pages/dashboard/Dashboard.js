@@ -1,43 +1,44 @@
-import React, { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
-import Header from "../../components/Header";
+import React, { useState } from "react";
 import Sidebar from "../../components/Sidebar";
+import BottomNavbar from "../../components/BottomNavbar";
+import Header from "../../components/Header";
+import { Outlet } from "react-router-dom";
 
 const Dashboard = () => {
-  const [open, setOpen] = useState(window.innerWidth >= 768);
-
-  const toggleSidebar = () => setOpen((prev) => !prev);
-
-  useEffect(() => {
-    const handleResize = () => {
-      // Collapse only when moving below 768, expand only when moving above 768
-      if (window.innerWidth < 768 && open) {
-        setOpen(false);
-      } else if (window.innerWidth >= 768 && !open) {
-        setOpen(true);
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [open]);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
-    <div>
-      <Header toggleSidebar={toggleSidebar} />
-      <Sidebar open={open} toggleSidebar={toggleSidebar} />
+    <div style={{ display: "flex", height: "100vh", overflow: "auto" }}>
+      {/* Sidebar */}
+      <Sidebar
+        sidebarOpen={sidebarOpen}
+        toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+      />
 
+      {/* Main Content Area */}
       <div
         style={{
-          marginLeft: open ? "230px" : "70px",
-          marginTop: "56px",
+          flex: 1,
+          marginLeft: sidebarOpen ? "220px" : "70px",
           transition: "all 0.3s ease",
-          padding: "20px",
           backgroundColor: "#f8f9fa",
-          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        <Outlet />
+        {/* ✅ Header */}
+        <Header
+          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          sidebarOpen={sidebarOpen}
+        />
+
+        {/* ✅ Sticky Top Navbar */}
+        <BottomNavbar />
+
+        {/* ✅ Page Content */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "20px" }}>
+          <Outlet />
+        </div>
       </div>
     </div>
   );

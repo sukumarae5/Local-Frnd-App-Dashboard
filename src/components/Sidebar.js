@@ -1,23 +1,37 @@
-import React, { useEffect, useState } from "react";
-import Nav from "react-bootstrap/Nav";
+import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
+import Nav from "react-bootstrap/Nav";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
-const Sidebar = ({ open, toggleSidebar }) => {
-  const [isMobile, setIsMobile] = useState(false);
+const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 992);
 
-  // Detect screen size
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    handleResize();
+    const handleResize = () => setIsMobile(window.innerWidth <= 992);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const menuItems = [
+    { to: "/dashboard", icon: "bi-speedometer2", label: "Dashboard" },
+    { to: "/userlistpage", icon: "bi-people", label: "User List" },
+    { to: "/moderation", icon: "bi-gear", label: "Moderation" },
+    { to: "/review", icon: "bi-person-check", label: "Profile Review" },
+    { to: "/monetization", icon: "bi-cash-stack", label: "Monetization" },
+    { to: "/analytics", icon: "bi-bar-chart-line", label: "Analytics" },
+  ];
+
+  // Determine sidebar width
+  const sidebarWidth = isMobile
+    ? sidebarOpen
+      ? "250px" // Expanded on toggle
+      : "80px" // Default collapsed on mobile
+    : "250px"; // Always open on desktop
+
   return (
     <>
-      {/* Overlay background when sidebar is open on mobile */}
-      {isMobile && open && (
+      {/* Overlay when sidebar is open on mobile */}
+      {isMobile && sidebarOpen && (
         <div
           onClick={toggleSidebar}
           style={{
@@ -26,96 +40,84 @@ const Sidebar = ({ open, toggleSidebar }) => {
             left: 0,
             width: "100vw",
             height: "100vh",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            backgroundColor: "rgba(0,0,0,0.5)",
             zIndex: 4999,
-            transition: "opacity 0.3s ease",
           }}
         ></div>
       )}
 
       {/* Sidebar */}
       <div
-        className="position-fixed d-flex flex-column"
         style={{
-          background: "linear-gradient(180deg, #1c1c1c, #333333, #4f4f4f)",
-          width: "250px",
+          width: sidebarWidth,
+          background: "linear-gradient(180deg, #0b0b0b, #1a1a1a, #222)",
+          color: "white",
           height: "100vh",
+          position: "fixed",
           top: 0,
-          left: open ? "0" : "-250px",
-          transition: "left 0.3s ease-in-out",
-          overflowY: "auto",
+          left: 0,
           zIndex: 5000,
-          boxShadow: open ? "2px 0 10px rgba(0,0,0,0.5)" : "none",
+          transition: "all 0.3s ease-in-out",
+          overflowX: "hidden",
+          boxShadow: "2px 0 10px rgba(0,0,0,0.3)",
         }}
       >
-        {/* ✅ Brand name + close icon */}
+        {/* Sidebar Header */}
         <div
-          className="fw-bold border-bottom border-secondary px-3 py-3 d-flex justify-content-between align-items-center"
+          className="d-flex align-items-center justify-content-center px-3"
           style={{
-            whiteSpace: "nowrap",
-            fontSize: "1.3rem",
+            height: "60px",
+            borderBottom: "1px solid #333",
           }}
         >
-          <span
+          <h5
+            className="m-0 text-center"
             style={{
               background: "linear-gradient(90deg, #0dcaf0, #66e1d3)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
+              fontWeight: "bold",
+              fontSize: "1rem",
+              whiteSpace: "nowrap",
             }}
           >
             Lokal Friend
-          </span>
-
-          {isMobile && (
-            <i
-              className="bi bi-x-lg text-white fs-5"
-              style={{ cursor: "pointer" }}
-              onClick={toggleSidebar}
-            ></i>
-          )}
+          </h5>
         </div>
 
-        {/* ✅ Navigation items */}
-        <Nav className="flex-column text-start px-2 py-3">
-          {[
-            { to: "/dashboard", icon: "bi-speedometer2", label: "Dashboard" },
-            { to: "userpagelist", icon: "bi-people", label: "User List" },
-            { to: "moderation", icon: "bi-gear", label: "Moderation" },
-            { to: "review", icon: "bi-person-check", label: "Profile Review" },
-            { to: "monetization", icon: "bi-cash-stack", label: "Monetization" },
-            { to: "analytics", icon: "bi-bar-chart-line", label: "Analytics" },
-          ].map(({ to, icon, label }) => (
+        {/* Sidebar Menu */}
+        <Nav className="flex-column mt-3 px-2">
+          {menuItems.map(({ to, icon, label }) => (
             <NavLink
               key={to}
               to={to}
+              onClick={() => isMobile && toggleSidebar()}
               className={({ isActive }) =>
-                `text-white mb-2 d-flex align-items-center sidebar-item ${
-                  isActive ? "fw-bold text-info" : ""
+                `d-flex align-items-center mb-2 text-decoration-none ${
+                  isActive ? "text-info fw-semibold" : "text-white"
                 }`
               }
-              style={{ textDecoration: "none" }}
-              onClick={() => isMobile && toggleSidebar()} // auto close when clicking a link on mobile
+              style={{
+                padding: "10px",
+                borderRadius: "6px",
+                transition: "0.3s ease",
+                justifyContent:
+                  sidebarOpen || !isMobile ? "flex-start" : "center",
+              }}
             >
               <i className={`bi ${icon} fs-5`}></i>
-              <span className="fw-semibold ms-3">{label}</span>
+              <span
+                style={{
+                  marginLeft: sidebarOpen || !isMobile ? "12px" : "0",
+                  display: sidebarOpen || !isMobile ? "inline" : "none",
+                  transition: "opacity 0.3s ease",
+                }}
+              >
+                {label}
+              </span>
             </NavLink>
           ))}
         </Nav>
-
-        <style jsx="true">{`
-          .sidebar-item {
-            padding: 6px 10px;
-            border-radius: 6px;
-          }
-          .sidebar-item:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #0dcaf0 !important;
-            transition: 0.3s ease-in-out;
-          }
-          .sidebar-item:hover i {
-            color: #0dcaf0;
-          }
-        `}</style>
       </div>
     </>
   );
