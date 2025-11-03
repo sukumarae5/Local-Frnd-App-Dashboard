@@ -1,55 +1,76 @@
-import React from "react";
-import { Navbar, Container, Button } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Navbar, Button } from "react-bootstrap";
 
 const Header = ({ toggleSidebar, sidebarOpen }) => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 992);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 992);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Layout adjustments
+  const headerMarginLeft = isMobile ? "0px" : sidebarOpen ? "250px" : "80px";
+  const headerWidth = isMobile
+    ? "100%"
+    : sidebarOpen
+    ? "calc(100% - 250px)"
+    : "calc(100% - 80px)";
+
   return (
-     
     <Navbar
-      variant="dark"
       fixed="top"
-      className="px-3"
+      variant="dark"
       style={{
         background: "linear-gradient(180deg, #0a0a0a, #1a1919, #262323)",
         height: "60px",
         zIndex: 4000,
+        marginLeft: headerMarginLeft,
+        width: headerWidth,
+        transition: "all 0.3s ease-in-out",
+        padding: "0 20px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-end", // right-aligned content
       }}
     >
- 
-
-      <Container
-        fluid
-        className="d-flex justify-content-between align-items-center"
+      <div
+        className="d-flex align-items-center gap-2"
+        style={{
+          transition: "all 0.3s ease-in-out",
+        }}
       >
-        {/* ☰ or × toggle button visible only on mobile */}
-        <Button
-          variant="light"
-          size="sm"
-          onClick={toggleSidebar}
-          className="d-md-none"
+        {/* ✅ Title - always visible (desktop + mobile) */}
+        <h6
+          className="text-white m-0"
           style={{
-            width: "35px",
-            height: "35px",
-            fontSize: "20px",
-            fontWeight: "bold",
+            whiteSpace: "nowrap",
+            fontSize: "1rem",
           }}
         >
-          {sidebarOpen ? "×" : "☰"}
-        </Button>
+          Welcome Admin Panel
+        </h6>
 
-        {/* Header title */}
-        
-      </Container>
-       <h6
-  className="text-white m-0"
-  style={{
-    paddingRight: "10px",
-    whiteSpace: "nowrap", // 👈 keeps text in one line
-  }}
->
-  Welcome Admin Panel
-</h6>
+        {/* ✅ Toggle - visible only on mobile */}
+        {isMobile && (
+          <Button
+            variant="light"
+            size="sm"
+            onClick={toggleSidebar}
+            style={{
+              width: "38px",
+              height: "38px",
+              fontSize: "20px",
+              fontWeight: "bold",
+              borderRadius: "6px",
+            }}
+          >
+            {sidebarOpen ? "×" : "☰"}
+          </Button>
+        )}
+      </div>
     </Navbar>
-     
   );
 };
 
