@@ -5,9 +5,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import {
   userEditRequest,
   userFetchRequest,
+  createUserRequest,
+  updateUserRequest,
 } from "../../features/user/userAction";
 import AppTable from "../../components/tables/AppTable";
-import { AppButtonRow } from "../../components/button/AppButton";
+import { AppAddButton, AppButtonRow } from "../../components/button/AppButton";
 import AppPagination from "../../components/pagination/AppPagination";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import UserForm from "../../components/forms/UserForms";
@@ -18,7 +20,7 @@ const UserListPage = () => {
 
   // Modal state
   const [formOpen, setFormOpen] = useState(false);
-  const [formMode, setFormMode] = useState("edit"); // only edit
+  const [formMode, setFormMode] = useState("add"); // "add" | "edit"
   const [formInitialValues, setFormInitialValues] = useState({});
 
   // Pagination (client-side)
@@ -89,29 +91,39 @@ const UserListPage = () => {
     profileStatus: r.profile_status ?? "",
     status: r.status ?? "",
     coins: r.coin_balance ?? "",
-    lat: r.location_lat ?? "",
-    lon: r.location_log ?? "",
+    location_lat: r.location_lat ?? "",
+    location_log: r.location_log ?? "",
     dob: r.date_of_birth ?? "",
     bio: r.bio ?? "",
-    otp: r.otp ?? "",
-    createdAt: r.created_at ?? r.createdAt ?? "",
-    updatedAt: r.updated_at ?? r.updatedAt ?? "",
   });
 
-  // open edit modal
+  console.log(toInitialValues)
+
+  // helpers that also push URL
+  const openAdd = () => {
+    setFormMode("add");
+    setFormInitialValues({});
+    setFormOpen(true);
+    if (!location.pathname.endsWith("/add")) navigate("add");
+  };
+
   const openEdit = (row) => {
     setFormMode("edit");
     setFormInitialValues(toInitialValues(row));
     setFormOpen(true);
 
-    if (!location.pathname.endsWith("/edit")) {
-      navigate("edit");
-    }
+    
+    dispatch(userEditRequest({ id: row.user_id ?? row.id }));
+
+    if (!location.pathname.endsWith("/edit")) navigate("edit");
   };
 
   const closeForm = () => {
     setFormOpen(false);
-    if (location.pathname.endsWith("/edit")) {
+    if (
+      location.pathname.endsWith("/add") ||
+      location.pathname.endsWith("/edit")
+    ) {
       navigate("/dashboard/userlistpage", { replace: true });
     }
   };
@@ -126,40 +138,33 @@ const UserListPage = () => {
       // TODO: dispatch(deleteUserRequest(row.user_id))
     }
   };
+  const handleAddUser = () => openAdd();
 
+  // If user hits /add or /edit directly, auto-open the modal to match URL
   useEffect(() => {
-    if (formOpen) return;
+    if (formOpen) return; // don't override if already open
+    if (location.pathname.endsWith("/add")) openAdd();
     if (location.pathname.endsWith("/edit")) {
       setFormMode("edit");
       setFormInitialValues({});
       setFormOpen(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
-const handleFormSubmit = (values) => {
-  const { id, user_id, ...rest } = values;
-  const editId = id ?? user_id;
-
-  const apiData = {
-    
-    name: rest.name,
-    gender: rest.gender,
-    age: rest.age,
-    location_lat: rest.lat,
-    location_log: rest.lon,
+  // Submit: send to backend + timestamps come from form
+  const handleFormSubmit = (values) => {
+    if (formMode === "add") {
+      dispatch(createUserRequest(values));
+    } else {
+      const payload = {
+        ...values,
+        id: values.id || values.user_id,
+      };
+      dispatch(updateUserRequest(payload));
+    }
+    closeForm();
   };
-
-  dispatch(
-    userEditRequest({
-      id: editId,
-      data: apiData,
-    })
-  );
-
-  closeForm();
-};
-
-
 
   // Columns aligned to your API fields
   const columns = useMemo(
@@ -269,7 +274,7 @@ const handleFormSubmit = (values) => {
             User List
           </h4>
 
-          {/* 🔍 Search only (no Add button) */}
+          {/* Search & Add */}
           <div
             style={{
               display: "flex",
@@ -306,11 +311,13 @@ const handleFormSubmit = (values) => {
                   width: "100%",
                   padding: "6px 10px 6px 30px",
                   borderRadius: "8px",
-                  border: "2px solid #ced4da", 
+                  border: "2px solid #ced4da",
                   fontSize: "0.9rem",
                 }}
               />
             </div>
+
+            <AppAddButton onAdd={handleAddUser} />
           </div>
         </div>
 

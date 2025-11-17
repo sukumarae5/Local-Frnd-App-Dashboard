@@ -15,6 +15,7 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
   const menuItems = [
     { to: "/dashboard", icon: "bi-speedometer2", label: "Dashboard" },
     { to: "/userlistpage", icon: "bi-people", label: "User List" },
+    { to: "/photolistpage", icon: "bi-people", label: "Photo List" },
     { to: "/moderation", icon: "bi-gear", label: "Moderation" },
     { to: "/review", icon: "bi-person-check", label: "Profile Review" },
     { to: "/monetization", icon: "bi-cash-stack", label: "Monetization" },
