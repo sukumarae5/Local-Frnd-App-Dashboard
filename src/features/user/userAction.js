@@ -1,4 +1,4 @@
-import { FETCH_USER_FAILURE, FETCH_USER_REQUEST, FETCH_USER_SUCCESS } from "./userType"
+import { EDIT_USER_FAILURE, EDIT_USER_REQUEST, EDIT_USER_SUCCESS, FETCH_USER_FAILURE, FETCH_USER_REQUEST, FETCH_USER_SUCCESS } from "./userType"
 
 export const userFetchRequest=()=>{
     return{
@@ -18,3 +18,17 @@ export const userFetchFailure=(error)=>{
         payload:error
     }
 }
+export const userEditRequest = ({ id, data = {} }) => ({
+  type: EDIT_USER_REQUEST,
+  payload: { id, data },
+});
+
+export const userEditSuccess = (user) => ({
+  type: EDIT_USER_SUCCESS,
+  payload: user,
+});
+
+export const userEditFailure = (error) => ({
+  type: EDIT_USER_FAILURE,
+  payload: error,
+});
