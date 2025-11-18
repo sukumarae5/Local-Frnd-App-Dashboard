@@ -3,6 +3,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
+  userDeleteRequest,
   userEditRequest,
   userFetchRequest,
 } from "../../features/user/userAction";
@@ -121,11 +122,16 @@ const UserListPage = () => {
     alert(`Viewing user: ${row.name ?? row.user_id}`);
   const handleEdit = (row) => openEdit(row);
   const handleDelete = (row) => {
-    if (window.confirm(`Are you sure to delete ${row.name ?? row.user_id}?`)) {
-      alert(`Deleted user: ${row.name ?? row.user_id}`);
-      // TODO: dispatch(deleteUserRequest(row.user_id))
-    }
-  };
+  if (window.confirm(`Are you sure to delete ${row.name ?? row.user_id}?`)) {
+    
+    dispatch(
+      userDeleteRequest({
+        id: row.user_id,
+        data: row, 
+      })
+    );
+  }
+};
 
   useEffect(() => {
     if (formOpen) return;
