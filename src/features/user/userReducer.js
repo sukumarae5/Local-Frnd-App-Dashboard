@@ -1,5 +1,8 @@
 // src/features/user/userReducer.js
 import {
+  DELETE_USER_FAILURE,
+  DELETE_USER_REQUEST,
+  DELETE_USER_SUCCESS,
   EDIT_USER_FAILURE,
   EDIT_USER_REQUEST,
   EDIT_USER_SUCCESS,
@@ -55,6 +58,23 @@ const userReducer = (state = initialState, action) => {
 
     case EDIT_USER_FAILURE:
       return { ...state, loading: false, error: action.payload };
+
+
+      case DELETE_USER_REQUEST:
+      return { ...state, loading: true, error: "" };
+
+    case DELETE_USER_SUCCESS: {
+      const updated = action.payload;
+      console.log(updated)
+      const nextUser = Array.isArray(state.user)
+        ? updateArrayById(state.user, updated)
+        : updated;
+      return { ...state, loading: false, user: nextUser, error: "" };
+    }
+
+    case DELETE_USER_FAILURE:
+      return { ...state, loading: false, error: action.payload };
+
 
     default:
       return state;
