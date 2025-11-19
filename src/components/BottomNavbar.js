@@ -1,151 +1,64 @@
 import React, { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
-import "bootstrap-icons/font/bootstrap-icons.css";
+import { useNavigate } from "react-router-dom";
 
-const BottomNavbar = () => {
-  const [screen, setScreen] = useState("desktop"); // mobile | tablet | desktop
-  const [layout, setLayout] = useState({
-    width: "70%",
-    leftOffset: "calc(50% + 120px)",
-    paddingX: "25px",
-  });
+export default function BottomNavbar({
+  activeMenu,
+  setActiveMenu,
+  sidebarWidth = 150,
+}) {
+  const [screen, setScreen] = useState("desktop");
+  const [layout, setLayout] = useState({});
+  const navigate = useNavigate();
+
+  const layoutOptions = {
+    mobile: { width: "70%", paddingX: "0px", titleTop: "75px", navTop: "115px", marginLeft: "20%", marginRight: "10%" },
+    tablet: { width: "65%", paddingX: "20px", titleTop: "78px", navTop: "118px", marginLeft: "17.5%", marginRight: "17.5%" },
+    desktop: { width: "65%", paddingX: "25px", titleTop: "80px", navTop: "120px", marginLeft: `${sidebarWidth + 300}px`, marginRight: "auto" },
+  };
 
   useEffect(() => {
     const handleResize = () => {
-      const width = window.innerWidth;
-
-      if (width <= 576) {
-        // 📱 Mobile — icons only
-        setScreen("mobile");
-        setLayout({
-          width: "80%",
-          leftOffset: "58%", // slightly left
-          paddingX: "25px",
-        });
-      } else if (width <= 992) {
-        // 💻 Tablet — icons only
-        setScreen("tablet");
-        setLayout({
-          width: "85%",
-          leftOffset: "53%", // better center alignment
-          paddingX: "55px",
-        });
-      } else {
-        // 🖥️ Desktop — icons + labels
-        setScreen("desktop");
-        setLayout({
-          width: "70%",
-          leftOffset: "calc(50% + 120px)",
-          paddingX: "30px",
-        });
-      }
+      const w = window.innerWidth;
+      if (w <= 576) { setScreen("mobile"); setLayout(layoutOptions.mobile); }
+      else if (w <= 992) { setScreen("tablet"); setLayout(layoutOptions.tablet); }
+      else { setScreen("desktop"); setLayout(layoutOptions.desktop); }
     };
-
-    handleResize(); // Run once when mounted
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [sidebarWidth]);
 
   const menuItems = [
-    { to: "/dashboard", icon: "bi-speedometer2", label: "Dashboard" },
-    { to: "/userpagelist", icon: "bi-people", label: "User List" },
-    { to: "/moderation", icon: "bi-gear", label: "Moderation" },
-    { to: "/review", icon: "bi-person-check", label: "Profile Review" },
-    { to: "/monetization", icon: "bi-cash-stack", label: "Monetization" },
-    { to: "/analytics", icon: "bi-bar-chart-line", label: "Analytics" },
-  ];
+    { key: "dashboard", icon: "bi-speedometer2", label: "Dashboard", path: "/dashboard/userlistpage" }, 
+  { key: "userlistpage", icon: "bi-people", label: "User List", path: "/dashboard/userlistpage" },
+  { key: "photolistpage", icon: "bi-image", label: "Photo List", path: "/dashboard/photolistpage" },
+  { key: "moderation", icon: "bi-gear", label: "Moderation", path: "/dashboard/moderation" },
+  { key: "review", icon: "bi-person-check", label: "Profile Review", path: "/dashboard/review" },
+  { key: "monetization", icon: "bi-cash-stack", label: "Monetization", path: "/dashboard/monetization" },
+  { key: "analytics", icon: "bi-bar-chart-line", label: "Analytics", path: "/dashboard/analytics" },
+];
 
   return (
     <>
-      {/* ✅ Title */}
-      <div
-        style={{
-          position: "fixed",
-          top: "80px",
-          left: layout.leftOffset,
-          transform: "translateX(-50%)",
-          width: layout.width,
-          textAlign: screen === "desktop" ? "center" : "left", // 📱 Left align on mobile
-          paddingLeft: screen === "desktop" ? "0" : "25px", // Add left padding
-          fontWeight: "600",
-          fontSize: "1.2rem",
-          color: "#333",
-          transition: "all 0.3s ease",
-          zIndex: 1051,
-        }}
-      >
+      <div style={{ position: "fixed", top: layout.titleTop, left: layout.marginLeft, right: layout.marginRight, width: layout.width, fontWeight: "600", fontSize: "1.2rem", color: "#333", textAlign: "center", zIndex: 1051 }}>
         Welcome Admin Panel
       </div>
 
-      {/* ✅ Navbar */}
-      <div
-        style={{
-          position: "fixed",
-          top: "120px",
-          left: layout.leftOffset,
-          transform: "translateX(-50%)",
-          width: layout.width,
-          backgroundColor: "#bdbbbbff",
-          borderRadius: "15px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-          padding: `10px ${layout.paddingX}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "5px",
-          overflowX: "auto",
-          whiteSpace: "nowrap",
-          transition: "all 0.3s ease",
-          zIndex: 1050,
-          boxSizing: "border-box",
-        }}
-        className="custom-scrollbar"
-      >
-        {menuItems.map(({ to, icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              `fw-semibold d-flex align-items-center justify-content-center gap-2 ${
-                isActive
-                  ? "text-primary border-bottom border-primary"
-                  : "text-dark"
-              }`
-            }
-            style={{
-              textDecoration: "none",
-              fontSize: "1rem",
-              padding: "6px 12px",
-              borderRadius: "8px",
-              borderBottom: "2px solid transparent",
-              transition: "all 0.2s ease",
-              flexShrink: 0,
-            }}
-          >
-            <i className={`bi ${icon}`}></i>
-            {/* ✅ Only show labels on desktop */}
-            {screen === "desktop" && label}
-          </NavLink>
-        ))}
+      <div style={{ position: "fixed", top: layout.navTop, left: layout.marginLeft, right: layout.marginRight, width: layout.width, backgroundColor: "#bdbbbb", borderRadius: "15px", padding: `10px ${layout.paddingX}`, display: "flex", justifyContent: screen === "desktop" ? "flex-start" : "space-around", gap: "10px", overflowX: screen === "desktop" ? "auto" : "hidden", whiteSpace: "nowrap", zIndex: 1050 }}>
+        {menuItems.map((item) => {
+          const isActive = activeMenu === item.key;
+          return (
+            <div
+              key={item.key}
+              onClick={() => { setActiveMenu(item.key); navigate(item.path); }}
+              style={{ padding: "6px 12px", borderBottom: isActive ? "2px solid #007bff" : "2px solid transparent", borderRadius: "6px", color: isActive ? "#007bff" : "#222", fontWeight: isActive ? "600" : "500", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px" }}
+            >
+              <i className={`bi ${item.icon}`} />
+              {screen === "desktop" && <span>{item.label}</span>}
+            </div>
+          );
+        })}
       </div>
-
-      {/* ✅ Custom Scrollbar Styles */}
-      <style>
-        {`
-          .custom-scrollbar::-webkit-scrollbar {
-            height: 6px;
-          }
-          .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #999;
-            border-radius: 10px;
-          }
-          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background-color: #666;
-          }
-        `}
-      </style>
     </>
   );
-};
-
-export default BottomNavbar;
+}

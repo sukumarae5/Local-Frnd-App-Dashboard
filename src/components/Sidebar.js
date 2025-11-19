@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
-import Nav from "react-bootstrap/Nav";
-import "bootstrap-icons/font/bootstrap-icons.css";
+import { useNavigate, useLocation } from "react-router-dom";
 
-const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
+export default function Sidebar({ sidebarOpen = true, toggleSidebar = () => {}, activeMenu, setActiveMenu }) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 992);
 
   useEffect(() => {
@@ -12,26 +12,33 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const sidebarWidth = isMobile ? (sidebarOpen ? "250px" : "80px") : "250px";
+
   const menuItems = [
-    { to: "/dashboard", icon: "bi-speedometer2", label: "Dashboard" },
-    { to: "/userlistpage", icon: "bi-people", label: "User List" },
-    { to: "/photolistpage", icon: "bi-people", label: "Photo List" },
-    { to: "/moderation", icon: "bi-gear", label: "Moderation" },
-    { to: "/review", icon: "bi-person-check", label: "Profile Review" },
-    { to: "/monetization", icon: "bi-cash-stack", label: "Monetization" },
-    { to: "/analytics", icon: "bi-bar-chart-line", label: "Analytics" },
+    { key: "dashboard", icon: "bi-speedometer2", label: "Dashboard", path: "/dashboard/userlistpage" },
+    { key: "userlistpage", icon: "bi-people", label: "User List", path: "/dashboard/userlistpage" },
+    { key: "photolistpage", icon: "bi-image", label: "Photo List", path: "/dashboard/photolistpage" },
+    { key: "moderation", icon: "bi-gear", label: "Moderation", path: "/dashboard/moderation" },
+    { key: "review", icon: "bi-person-check", label: "Profile Review", path: "/dashboard/review" },
+    { key: "monetization", icon: "bi-cash-stack", label: "Monetization", path: "/dashboard/monetization" },
+    { key: "analytics", icon: "bi-bar-chart-line", label: "Analytics", path: "/dashboard/analytics" },
   ];
 
-  // Determine sidebar width
-  const sidebarWidth = isMobile
-    ? sidebarOpen
-      ? "250px" // Expanded on toggle
-      : "80px" // Default collapsed on mobile
-    : "250px"; // Always open on desktop
+  const menuItemStyle = (isActive) => ({
+    padding: "10px",
+    marginBottom: "10px",
+    borderRadius: "6px",
+    display: "flex",
+    alignItems: "center",
+    cursor: "pointer",
+    transition: "0.3s",
+    background: isActive ? "#2563eb" : "transparent",
+    color: isActive ? "white" : "#e5e7eb",
+    justifyContent: sidebarOpen || !isMobile ? "flex-start" : "center",
+  });
 
   return (
     <>
-      {/* Overlay when sidebar is open on mobile */}
       {isMobile && sidebarOpen && (
         <div
           onClick={toggleSidebar}
@@ -47,7 +54,6 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
         ></div>
       )}
 
-      {/* Sidebar */}
       <div
         style={{
           width: sidebarWidth,
@@ -60,68 +66,54 @@ const Sidebar = ({ sidebarOpen, toggleSidebar }) => {
           zIndex: 5000,
           transition: "all 0.3s ease-in-out",
           overflowX: "hidden",
-          boxShadow: "2px 0 10px rgba(0,0,0,0.3)",
         }}
       >
-        {/* Sidebar Header */}
+        {/* Logo */}
         <div
-          className="d-flex align-items-center justify-content-center px-3"
           style={{
             height: "60px",
             borderBottom: "1px solid #333",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
           <h5
-            className="m-0 text-center"
             style={{
               background: "linear-gradient(90deg, #0dcaf0, #66e1d3)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               fontWeight: "bold",
               fontSize: "1rem",
-              whiteSpace: "nowrap",
             }}
           >
             Lokal Friend
           </h5>
         </div>
 
-        {/* Sidebar Menu */}
-        <Nav className="flex-column mt-3 px-2">
-          {menuItems.map(({ to, icon, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              onClick={() => isMobile && toggleSidebar()}
-              className={({ isActive }) =>
-                `d-flex align-items-center mb-2 text-decoration-none ${
-                  isActive ? "text-info fw-semibold" : "text-white"
-                }`
-              }
-              style={{
-                padding: "10px",
-                borderRadius: "6px",
-                transition: "0.3s ease",
-                justifyContent:
-                  sidebarOpen || !isMobile ? "flex-start" : "center",
-              }}
-            >
-              <i className={`bi ${icon} fs-5`}></i>
-              <span
-                style={{
-                  marginLeft: sidebarOpen || !isMobile ? "12px" : "0",
-                  display: sidebarOpen || !isMobile ? "inline" : "none",
-                  transition: "opacity 0.3s ease",
+        {/* Menu Items */}
+        <div style={{ padding: "12px" }}>
+          {menuItems.map((item) => {
+            const isActive = activeMenu === item.key; // highlight active based on shared state
+            return (
+              <div
+                key={item.key}
+                style={menuItemStyle(isActive)}
+                onClick={() => {
+                  setActiveMenu(item.key); // update Dashboard + BottomNavbar
+                  navigate(item.path);
+                  if (isMobile) toggleSidebar();
                 }}
               >
-                {label}
-              </span>
-            </NavLink>
-          ))}
-        </Nav>
+                <i className={`bi ${item.icon} fs-5`} />
+                {(sidebarOpen || !isMobile) && (
+                  <span style={{ marginLeft: "12px" }}>{item.label}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </>
   );
-};
-
-export default Sidebar;
+}
