@@ -1,5 +1,5 @@
 // src/components/forms/UserForms.jsx
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function UserForm({
   open = false,
@@ -7,36 +7,16 @@ export default function UserForm({
   initialValues = {},
   onClose,
   onSubmit,
+  backendErrors = {}, // 👈 new prop for backend error mapping
 }) {
-  // Helper to calculate age from DOB
-  const calcAgeFromDob = (dobStr) => {
-    if (!dobStr) return "";
-    const dob = new Date(dobStr);
-    if (Number.isNaN(dob.getTime())) return "";
-    const today = new Date();
-    let age = today.getFullYear() - dob.getFullYear();
-    const m = today.getMonth() - dob.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
-    return String(age);
-  };
-
-  // Normalized initial values
   const v = {
     id: initialValues.id ?? initialValues.user_id ?? "",
     name: initialValues.name ?? "",
     username: initialValues.username ?? "",
     mobile: initialValues.mobile ?? initialValues.mobile_number ?? "",
     email: initialValues.email ?? "",
-    dateOfBirth:
-      initialValues.dateOfBirth ??
-      initialValues.date_of_birth ??
-      initialValues.dob ??
-      "",
-    age:
-      initialValues.age ??
-      (initialValues.date_of_birth
-        ? calcAgeFromDob(initialValues.date_of_birth)
-        : ""),
+    age: initialValues.age ?? "",
+    dob: initialValues.dob ?? initialValues.date_of_birth ?? "",
     gender:
       initialValues.gender === "male"
         ? "Male"
@@ -55,31 +35,12 @@ export default function UserForm({
 
   const [errors, setErrors] = useState({});
 
-  const [dob, setDob] = useState(
-    v.dateOfBirth ? String(v.dateOfBirth).slice(0, 10) : ""
-  );
-  const [age, setAge] = useState(
-    v.age || (v.dateOfBirth ? calcAgeFromDob(v.dateOfBirth) : "")
-  );
-
-  const dobInputRef = useRef(null);
-
+  // 🔁 Whenever backend sends field errors, merge them into local errors
   useEffect(() => {
-    const normDob =
-      initialValues.dateOfBirth ??
-      initialValues.date_of_birth ??
-      initialValues.dob ??
-      "";
-
-    const normAge =
-      initialValues.age ??
-      (initialValues.date_of_birth
-        ? calcAgeFromDob(initialValues.date_of_birth)
-        : "");
-
-    setDob(normDob ? String(normDob).slice(0, 10) : "");
-    setAge(normAge || "");
-  }, [initialValues]);
+    if (backendErrors && Object.keys(backendErrors).length > 0) {
+      setErrors((prev) => ({ ...prev, ...backendErrors }));
+    }
+  }, [backendErrors]);
 
   if (!open) return null;
 
@@ -166,26 +127,6 @@ export default function UserForm({
       ? { borderColor: "#f97373", boxShadow: "0 0 0 1px rgba(248,113,113,0.4)" }
       : {};
 
-  const dateWrapperStyle = { position: "relative" };
-  const dateInputStyle = {
-    ...inputStyle,
-    paddingRight: "38px",
-  };
-
-  const calendarButtonStyle = {
-    position: "absolute",
-    right: 8,
-    top: "50%",
-    transform: "translateY(-50%)",
-    border: "none",
-    background: "transparent",
-    padding: 0,
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  };
-
   const Field = ({ label, children }) => (
     <div style={fieldStyle}>
       <label style={labelStyle}>{label}</label>
@@ -195,43 +136,34 @@ export default function UserForm({
 
   const Row = ({ children }) => <div style={rowStyle}>{children}</div>;
 
-  // --- HANDLE SUBMIT WITH AGE VALIDATION ---
+  // --- SUBMIT ---
   const handleSubmit = (e) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const values = Object.fromEntries(fd.entries());
 
-    // Auto-calc age from DOB
-    if (values.dateOfBirth) {
-      const calc = calcAgeFromDob(values.dateOfBirth);
-      const ageNum = Number(calc);
-      if (!Number.isNaN(ageNum)) values.age = ageNum;
-    }
-
-    // ----------------------------
-    // ✅ AGE VALIDATION CHECK
-    // ----------------------------
-    const ageNum = Number(values.age);
-    if (!Number.isNaN(ageNum) && ageNum < 18) {
-      alert("User must be 18 years old or older.");
-      return; // stop submitting
-    }
-
     const newErrors = {};
 
+    // Basic required validations (you can adjust per mode if you want)
     if (!values.id?.trim()) newErrors.id = "User ID is required.";
     if (!values.name?.trim()) newErrors.name = "Name is required.";
-    if (!values.mobile?.trim())
-      newErrors.mobile = "Mobile Number is required.";
-    if (!values.dateOfBirth)
-      newErrors.dateOfBirth = "Date of Birth is required.";
+    if (!values.mobile?.trim()) newErrors.mobile = "Mobile Number is required.";
     if (!values.gender) newErrors.gender = "Gender is required.";
+    if (!values.age?.trim()) newErrors.age = "Age is required.";
+    if (!values.lat?.trim()) newErrors.lat = "Latitude is required.";
+    if (!values.lon?.trim()) newErrors.lon = "Longitude is required.";
 
-    if (
-      values.email &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)
-    ) {
+    // Email pattern validation
+    if (values.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
       newErrors.email = "Please enter a valid email.";
+    }
+
+    // Mobile: at least 10 digits
+    if (values.mobile) {
+      const digitsOnly = values.mobile.replace(/\D/g, "");
+      if (digitsOnly.length < 10) {
+        newErrors.mobile = "Mobile number must be at least 10 digits.";
+      }
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -241,7 +173,8 @@ export default function UserForm({
 
     setErrors({});
 
-    ["id", "coins"].forEach((field) => {
+    // Convert numeric fields
+    ["id", "age", "coins"].forEach((field) => {
       if (values[field] !== undefined && values[field] !== "") {
         const n = Number(values[field]);
         if (!Number.isNaN(n)) values[field] = n;
@@ -254,7 +187,6 @@ export default function UserForm({
   return (
     <div style={backdropStyle} onClick={onClose}>
       <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-        {/* HEADER */}
         <div
           style={{
             display: "flex",
@@ -285,7 +217,6 @@ export default function UserForm({
           </button>
         </div>
 
-        {/* FORM */}
         <form onSubmit={handleSubmit} noValidate>
           <input type="hidden" name="otp" defaultValue={v.otp} />
 
@@ -348,68 +279,26 @@ export default function UserForm({
               )}
             </Field>
 
-            <Field label="Age (auto) *">
+            <Field label="Date of Birth">
               <input
-                name="age"
+                type="date"
+                name="dob"
                 style={inputStyle}
-                value={age}
-                readOnly
-                placeholder="Auto"
+                defaultValue={v.dob}
               />
+              {errors.dob && <div style={errorTextStyle}>{errors.dob}</div>}
             </Field>
           </Row>
 
           <Row>
-            <Field label="Date of Birth *">
-              <div style={dateWrapperStyle}>
-                <input
-                  name="dateOfBirth"
-                  type="date"
-                  ref={dobInputRef}
-                  style={{
-                    ...dateInputStyle,
-                    ...inputErrorStyle("dateOfBirth"),
-                  }}
-                  value={dob}
-                  onChange={(e) => {
-                    const newDob = e.target.value;
-                    setDob(newDob);
-                    setAge(calcAgeFromDob(newDob));
-                  }}
-                />
-                {errors.dateOfBirth && (
-                  <div style={errorTextStyle}>{errors.dateOfBirth}</div>
-                )}
-
-                <button
-                  type="button"
-                  style={calendarButtonStyle}
-                  onClick={() => {
-                    if (dobInputRef.current?.showPicker) {
-                      dobInputRef.current.showPicker();
-                    } else {
-                      dobInputRef.current?.focus();
-                    }
-                  }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#e5e7eb"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                  </svg>
-                </button>
-              </div>
+            <Field label="Age *">
+              <input
+                name="age"
+                style={{ ...inputStyle, ...inputErrorStyle("age") }}
+                defaultValue={v.age}
+                placeholder="25"
+              />
+              {errors.age && <div style={errorTextStyle}>{errors.age}</div>}
             </Field>
 
             <Field label="Gender *">
@@ -475,22 +364,24 @@ export default function UserForm({
           </Row>
 
           <Row>
-            <Field label="Location Lat">
+            <Field label="Location Lat *">
               <input
                 name="lat"
-                style={inputStyle}
+                style={{ ...inputStyle, ...inputErrorStyle("lat") }}
                 placeholder="37.7749"
                 defaultValue={v.lat}
               />
+              {errors.lat && <div style={errorTextStyle}>{errors.lat}</div>}
             </Field>
 
-            <Field label="Location Lon">
+            <Field label="Location Lon *">
               <input
                 name="lon"
-                style={inputStyle}
+                style={{ ...inputStyle, ...inputErrorStyle("lon") }}
                 placeholder="-122.4194"
                 defaultValue={v.lon}
               />
+              {errors.lon && <div style={errorTextStyle}>{errors.lon}</div>}
             </Field>
           </Row>
 

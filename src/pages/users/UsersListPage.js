@@ -1,33 +1,27 @@
 // src/pages/users/UserListPage.jsx
 import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   userDeleteRequest,
-  userEditRequest,
   userFetchRequest,
 } from "../../features/user/userAction";
 import AppTable from "../../components/tables/AppTable";
 import { AppButtonRow } from "../../components/button/AppButton";
 import AppPagination from "../../components/pagination/AppPagination";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import UserForm from "../../components/forms/UserForms";
 
 const UserListPage = () => {
   const [q, setQ] = useState("");
   const [screenSize, setScreenSize] = useState("desktop");
 
-  // Modal state
-  const [formOpen, setFormOpen] = useState(false);
-  const [formMode, setFormMode] = useState("edit"); // only edit
-  const [formInitialValues, setFormInitialValues] = useState({});
-
-  // Pagination (client-side)
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const dispatch = useDispatch();
   const { loading, user, error } = useSelector((s) => s.user || {});
+
+  const navigate = useNavigate();
 
   // Normalize: API may return single object or array
   const users = useMemo(() => {
@@ -35,9 +29,6 @@ const UserListPage = () => {
     if (user && typeof user === "object") return [user];
     return [];
   }, [user]);
-
-  const navigate = useNavigate();
-  const location = useLocation();
 
   // responsive
   useEffect(() => {
@@ -62,14 +53,6 @@ const UserListPage = () => {
     setCurrentPage(1);
   }, [users.length]);
 
-  // lock scroll ONLY when modal open
-  useEffect(() => {
-    if (!formOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => (document.body.style.overflow = prev);
-  }, [formOpen]);
-
   // debounce search
   useEffect(() => {
     const delay = setTimeout(() => {
@@ -78,94 +61,24 @@ const UserListPage = () => {
     return () => clearTimeout(delay);
   }, [q, dispatch]);
 
-  // Map table row → initialValues for form (fields per your API)
-  const toInitialValues = (r) => ({
-    id: r.user_id,
-    name: r.name ?? "",
-    username: r.username ?? "",
-    mobile: r.mobile_number ?? "",
-    email: r.email ?? "",
-    age: r.age ?? "",
-    gender: r.gender ?? "",
-    profileStatus: r.profile_status ?? "",
-    status: r.status ?? "",
-    coins: r.coin_balance ?? "",
-    lat: r.location_lat ?? "",
-    lon: r.location_log ?? "",
-    dob: r.date_of_birth ?? "",
-    bio: r.bio ?? "",
-    otp: r.otp ?? "",
-    createdAt: r.created_at ?? r.createdAt ?? "",
-    updatedAt: r.updated_at ?? r.updatedAt ?? "",
-  });
-
-  // open edit modal
-  const openEdit = (row) => {
-    setFormMode("edit");
-    setFormInitialValues(toInitialValues(row));
-    setFormOpen(true);
-
-    if (!location.pathname.endsWith("/edit")) {
-      navigate("edit");
-    }
-  };
-
-  const closeForm = () => {
-    setFormOpen(false);
-    if (location.pathname.endsWith("/edit")) {
-      navigate("/dashboard/userlistpage", { replace: true });
-    }
-  };
-
-  // wire table actions
   const handleView = (row) =>
     alert(`Viewing user: ${row.name ?? row.user_id}`);
-  const handleEdit = (row) => openEdit(row);
-  const handleDelete = (row) => {
-  if (window.confirm(`Are you sure to delete ${row.name ?? row.user_id}?`)) {
-    
-    dispatch(
-      userDeleteRequest({
-        id: row.user_id,
-        data: row, 
-      })
-    );
-  }
-};
 
-  useEffect(() => {
-    if (formOpen) return;
-    if (location.pathname.endsWith("/edit")) {
-      setFormMode("edit");
-      setFormInitialValues({});
-      setFormOpen(true);
-    }
-  }, [location.pathname]);
-
-const handleFormSubmit = (values) => {
-  const { id, user_id, ...rest } = values;
-  const editId = id ?? user_id;
-
-  const apiData = {
-    
-    name: rest.name,
-    gender: rest.gender,
-    age: rest.age,
-    location_lat: rest.lat,
-    location_log: rest.lon,
+  const handleEdit = (row) => {
+    // Navigate to edit page and pass selected row in location.state
+    navigate("/dashboard/userlistpage/edit", { state: { row } });
   };
 
-  dispatch(
-    userEditRequest({
-      id: editId,
-      data: apiData,
-    })
-  );
-
-  closeForm();
-};
-
-
+  const handleDelete = (row) => {
+    if (window.confirm(`Are you sure to delete ${row.name ?? row.user_id}?`)) {
+      dispatch(
+        userDeleteRequest({
+          id: row.user_id,
+          data: row,
+        })
+      );
+    }
+  };
 
   // Columns aligned to your API fields
   const columns = useMemo(
@@ -275,7 +188,7 @@ const handleFormSubmit = (values) => {
             User List
           </h4>
 
-          {/* 🔍 Search only (no Add button) */}
+          {/* 🔍 Search only */}
           <div
             style={{
               display: "flex",
@@ -312,7 +225,7 @@ const handleFormSubmit = (values) => {
                   width: "100%",
                   padding: "6px 10px 6px 30px",
                   borderRadius: "8px",
-                  border: "2px solid #ced4da", 
+                  border: "2px solid #ced4da",
                   fontSize: "0.9rem",
                 }}
               />
@@ -363,15 +276,6 @@ const handleFormSubmit = (values) => {
           </>
         )}
       </div>
-
-      {/* Modal */}
-      <UserForm
-        open={formOpen}
-        mode={formMode}
-        initialValues={formInitialValues}
-        onClose={closeForm}
-        onSubmit={handleFormSubmit}
-      />
     </div>
   );
 };

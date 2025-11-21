@@ -1,7 +1,9 @@
-// src/pages/photos/PhotoListPage.jsx
 import React, { useEffect, useMemo, useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchPhotosRequest } from "../../features/photos/photosAction";
+import {
+  fetchPhotosRequest,
+  DeletePhotosRequest,
+} from "../../features/photos/photosAction";
 import AppTable from "../../components/tables/AppTable";
 import { AppButtonRow } from "../../components/button/AppButton";
 
@@ -36,11 +38,27 @@ const PhotoListPage = () => {
 
   const handleEdit = useCallback((row) => {
     console.log("Edit photo:", row);
+    // TODO: navigate to edit page if needed
   }, []);
 
-  const handleDelete = useCallback((row) => {
-    console.log("Delete photo:", row);
-  }, []);
+  const handleDelete = useCallback(
+    (row) => {
+      if (
+        window.confirm(
+          `Are you sure you want to delete photo with ID ${row.photo_id}?`
+        )
+      ) {
+        // ✅ Send both user_id and photo_id
+        dispatch(
+          DeletePhotosRequest({
+            user_id: row.user_id,
+            photo_id: row.photo_id,
+          })
+        );
+      }
+    },
+    [dispatch]
+  );
 
   const columns = useMemo(
     () => [
@@ -112,14 +130,14 @@ const PhotoListPage = () => {
           alignItems: "center",
         }}
       >
-        <h3 style={{ marginLeft:"15px" }}>Photo Management</h3>
+        <h3 style={{ marginLeft: "15px" }}>Photo Management</h3>
 
         {/* 🔍 SEARCH BAR WITH ICON */}
         <div
           style={{
             position: "relative",
             width: "240px",
-            marginRight:"25px"
+            marginRight: "25px",
           }}
         >
           <i
