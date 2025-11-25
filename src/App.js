@@ -10,8 +10,12 @@ const App = () => {
       <Routes>
         {/* Dashboard layout */}
         <Route path="/" element={<Dashboard />}>
-          {/* Nested pages inside dashboard */}
+          
+          {/* User List + Edit path */}
           <Route path="/dashboard/userlistpage" element={<UserListPage />} />
+          <Route path="/dashboard/userlistpage/edit" element={<UserListPage />} />
+
+          {/* Other pages */}
           <Route path="/dashboard/photolistpage" element={<PhotoListPage />} />
           <Route path="/dashboard/moderation" element={<div>Moderation Page</div>} />
           <Route path="/dashboard/review" element={<div>Profile Review Page</div>} />
@@ -24,4 +28,3 @@ const App = () => {
 };
 
 export default App;
-  

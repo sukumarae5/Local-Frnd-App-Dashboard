@@ -1,4 +1,4 @@
-import { EDIT_USER_FAILURE, EDIT_USER_REQUEST, EDIT_USER_SUCCESS, FETCH_USER_FAILURE, FETCH_USER_REQUEST, FETCH_USER_SUCCESS } from "./userType"
+import { DELETE_USER_FAILURE, DELETE_USER_REQUEST, DELETE_USER_SUCCESS, EDIT_USER_FAILURE, EDIT_USER_REQUEST, EDIT_USER_SUCCESS, FETCH_USER_FAILURE, FETCH_USER_REQUEST, FETCH_USER_SUCCESS } from "./userType"
 
 export const userFetchRequest=()=>{
     return{
@@ -32,3 +32,26 @@ export const userEditFailure = (error) => ({
   type: EDIT_USER_FAILURE,
   payload: error,
 });
+
+
+export const userDeleteRequest=(id)=>{
+    return{
+        type:DELETE_USER_REQUEST,
+        payload:id
+    }
+}
+export const userDeleteSuccess=(id)=>{
+    return{
+        type:DELETE_USER_SUCCESS,
+        payload:id
+
+    }
+}
+export const  userDeleteFailure=(error)=>{
+    return{
+        type:DELETE_USER_FAILURE,
+        payload:error
+    }
+}
+
+

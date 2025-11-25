@@ -360,57 +360,59 @@ export default function UserForm({
           </Row>
 
           <Row>
-            <Field label="Date of Birth *">
-              <div style={dateWrapperStyle}>
-                <input
-                  name="dateOfBirth"
-                  type="date"
-                  ref={dobInputRef}
-                  style={{
-                    ...dateInputStyle,
-                    ...inputErrorStyle("dateOfBirth"),
-                  }}
-                  value={dob}
-                  onChange={(e) => {
-                    const newDob = e.target.value;
-                    setDob(newDob);
-                    setAge(calcAgeFromDob(newDob));
-                  }}
-                />
-                {errors.dateOfBirth && (
-                  <div style={errorTextStyle}>{errors.dateOfBirth}</div>
-                )}
+           <Field label="Date of Birth *">
+  <div style={{ position: "relative" }}>
+    <input
+      name="dateOfBirth"
+      type="date"
+      ref={dobInputRef}
+      style={{
+        ...inputStyle,
+        ...inputErrorStyle("dateOfBirth"),
+        // Remove default browser calendar icon
+        appearance: "none",
+        WebkitAppearance: "none",
+        MozAppearance: "none",
+      }}
+      value={dob}
+      onChange={(e) => {
+        const newDob = e.target.value;
+        setDob(newDob);
+        setAge(calcAgeFromDob(newDob));
+      }}
+    />
 
-                <button
-                  type="button"
-                  style={calendarButtonStyle}
-                  onClick={() => {
-                    if (dobInputRef.current?.showPicker) {
-                      dobInputRef.current.showPicker();
-                    } else {
-                      dobInputRef.current?.focus();
-                    }
-                  }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#e5e7eb"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                  </svg>
-                </button>
-              </div>
-            </Field>
+    {/* Custom white calendar icon */}
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#ffffff"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{
+        position: "absolute",
+        right: "10px",
+        top: "50%",
+        transform: "translateY(-50%)",
+        pointerEvents: "none",
+      }}
+    >
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+
+    {errors.dateOfBirth && (
+      <div style={errorTextStyle}>{errors.dateOfBirth}</div>
+    )}
+  </div>
+</Field>
+
 
             <Field label="Gender *">
               <select

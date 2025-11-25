@@ -13,10 +13,11 @@ import axios from "axios";
 
 
 function* apiFetchPhotos() {
+  console.log(USERPHOTOS)
   try {
     const response = yield call(axios.get, USERPHOTOS);
     console.log(response)
-    return response.data;
+    return response.data.photos;
   } catch (error) {
     const message =
       error.response?.data?.message ||

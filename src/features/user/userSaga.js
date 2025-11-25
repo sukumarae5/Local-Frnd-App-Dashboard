@@ -2,9 +2,9 @@
 import { call, put, takeLatest, all } from "redux-saga/effects";
 import axios from "axios";
 
-import { EDIT_API, USERDATA } from "../../api/userApi"; // e.g., http://<ip>/api/user
-import { userEditFailure, userEditSuccess, userFetchFailure, userFetchSuccess } from "./userAction";
-import { EDIT_USER_REQUEST, FETCH_USER_REQUEST } from "./userType";
+import { DELETE_API, EDIT_API, USERDATA } from "../../api/userApi"; // e.g., http://<ip>/api/user
+import { userDeleteFailure, userDeleteSuccess, userEditFailure, userEditSuccess, userFetchFailure, userFetchSuccess } from "./userAction";
+import { DELETE_USER_REQUEST, EDIT_USER_REQUEST, FETCH_USER_REQUEST } from "./userType";
 
 function* fetchUsers(action) {
   try {
@@ -35,6 +35,28 @@ function* editUsers(action) {
   }
 }
 
+function* deleteUsers(action) {
+  try {
+    const { id } = action.payload || {};
+    if (!id) throw new Error("Missing user id for delete");
+
+    console.log("Deleting user id:", id);
+
+    // 🔹 DELETE request (no need for data in most APIs)
+    yield call(axios.delete, `${DELETE_API}/${id}`);
+
+    // 🔹 tell Redux the delete was successful (only send id)
+    yield put(userDeleteSuccess(id));
+  } catch (error) {
+    const message =
+      error.response?.data?.message || error.message || "Failed to delete user";
+    yield put(userDeleteFailure(message));
+  }
+}
+
+
+
+
 function* watchFetchUsers() {
   yield takeLatest(FETCH_USER_REQUEST, fetchUsers);
 }
@@ -42,6 +64,12 @@ function* watchEditUsers() {
   yield takeLatest(EDIT_USER_REQUEST, editUsers);
 }
 
-export default function* userSaga() {
-  yield all([watchFetchUsers(), watchEditUsers()]);
+function* watchDeleteUsers() {
+  yield takeLatest(DELETE_USER_REQUEST, deleteUsers);
 }
+
+export default function* userSaga() {
+  yield all([watchFetchUsers(), watchEditUsers(),watchDeleteUsers()]);
+}
+
+

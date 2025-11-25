@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
+  userDeleteRequest,
   userEditRequest,
   userFetchRequest,
 } from "../../features/user/userAction";
@@ -98,6 +99,57 @@ const UserListPage = () => {
       navigate("/dashboard/userlistpage", { replace: true });
   };
 
+  // wire table actions
+  const handleView = (row) =>
+    alert(`Viewing user: ${row.name ?? row.user_id}`);
+  const handleEdit = (row) => openEdit(row);
+  const handleDelete = (row) => {
+  if (window.confirm(`Are you sure to delete ${row.name ?? row.user_id}?`)) {
+    
+    dispatch(
+      userDeleteRequest({
+        id: row.user_id,
+        data: row, 
+      })
+    );
+  }
+};
+
+  useEffect(() => {
+    if (formOpen) return;
+    if (location.pathname.endsWith("/edit")) {
+      setFormMode("edit");
+      setFormInitialValues({});
+      setFormOpen(true);
+    }
+  }, [location.pathname]);
+
+const handleFormSubmit = (values) => {
+  const { id, user_id, ...rest } = values;
+  const editId = id ?? user_id;
+
+  const apiData = {
+    
+    name: rest.name,
+    gender: rest.gender,
+    age: rest.age,
+    location_lat: rest.lat,
+    location_log: rest.lon,
+  };
+
+  dispatch(
+    userEditRequest({
+      id: editId,
+      data: apiData,
+    })
+  );
+
+  closeForm();
+};
+
+
+
+  // Columns aligned to your API fields
   const columns = useMemo(
     () => [
       { key: "user_id", label: "ID" },
