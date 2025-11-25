@@ -1,7 +1,9 @@
+// src/App.js
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/dashboard/Dashboard";
 import UserListPage from "./pages/users/UsersListPage";
+import UserEditFormDesign from "./pages/users/UserEditFormDesign";
 import PhotoListPage from "./pages/photos/PhotoListPage";
 
 const App = () => {
