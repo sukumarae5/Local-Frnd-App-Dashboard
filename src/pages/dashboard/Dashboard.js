@@ -9,6 +9,7 @@ const Dashboard = () => {
   const [screen, setScreen] = useState("desktop");
   const [activeMenu, setActiveMenu] = useState("dashboard");
 
+  // Detect Screen Size
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
@@ -16,16 +17,19 @@ const Dashboard = () => {
       else if (width <= 954) setScreen("tablet");
       else setScreen("desktop");
     };
+
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Dynamic sidebar margin space
   const getContentMarginLeft = () => {
     if (screen === "mobile") return "60px";
     if (screen === "tablet") return sidebarOpen ? "240px" : "60px";
     return sidebarOpen ? "200px" : "80px";
   };
+
   const getContentMarginRight = () => {
     if (screen === "mobile") return "-20px";
     if (screen === "tablet") return sidebarOpen ? "20px" : "-40px";
@@ -35,12 +39,22 @@ const Dashboard = () => {
   const getOutletPaddingLeft = () => {
     if (screen === "mobile") return "12px";
     if (screen === "tablet") return "16px";
-    return "150px";
+    return "80px";
   };
+
   const getOutletPaddingRight = () => {
     if (screen === "mobile") return "12px";
     if (screen === "tablet") return "20px";
     return "150px";
+  };
+
+  // ⭐ Responsive Welcome Box Styles
+  const welcomeBoxStyles = {
+    marginTop: "50px",
+    marginRight:
+      screen === "desktop" ? "400px" : screen === "tablet" ? "100px" : "20px",
+    marginLeft:
+      screen === "desktop" ? "150px" : screen === "tablet" ? "60px" : "20px",
   };
 
   return (
@@ -65,9 +79,17 @@ const Dashboard = () => {
           overflow: "hidden",
         }}
       >
-        <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
+        <Header
+          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          sidebarOpen={sidebarOpen}
+        />
 
-        {/* Removed Title + Search completely */}
+        {/* ⭐ DEFAULT WELCOME PAGE (only when no Outlet content is shown) */}
+        {activeMenu === "dashboard" && (
+          <div style={welcomeBoxStyles}>
+            <h1>Welcome to AdminDashboard</h1>
+          </div>
+        )}
 
         <div
           style={{
@@ -87,6 +109,7 @@ const Dashboard = () => {
               `}
             </style>
           )}
+
           <Outlet />
         </div>
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   userDeleteRequest,
   userFetchRequest,
@@ -12,22 +12,18 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 
 const UserListPage = () => {
   const [q, setQ] = useState("");
+  const [screen, setScreen] = useState("desktop");
 
-  const [screen, setScreen] = useState("desktop"); // <-- ADDED
-
-  // Modal state
   const [formOpen, setFormOpen] = useState(false);
-  const [formMode, setFormMode] = useState("edit"); // only edit
+  const [formMode, setFormMode] = useState("edit");
   const [formInitialValues, setFormInitialValues] = useState({});
 
-  // Pagination (client-side)
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const dispatch = useDispatch();
   const { loading, user, error } = useSelector((s) => s.user || {});
 
-  // Normalize: API may return single object or array
   const users = useMemo(() => {
     if (Array.isArray(user)) return user;
     if (user && typeof user === "object") return [user];
@@ -37,7 +33,7 @@ const UserListPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ✔ Detect Screen Size
+  // Screen size detection
   useEffect(() => {
     const handleResize = () => {
       const w = window.innerWidth;
@@ -45,22 +41,20 @@ const UserListPage = () => {
       else if (w <= 992) setScreen("tablet");
       else setScreen("desktop");
     };
+
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-
   useEffect(() => {
     dispatch(userFetchRequest());
   }, [dispatch]);
 
-  // Search Debounce
   useEffect(() => {
     setCurrentPage(1);
   }, [users.length]);
 
-  // lock scroll ONLY when modal open
   useEffect(() => {
     if (!formOpen) return;
     const prev = document.body.style.overflow;
@@ -76,7 +70,7 @@ const UserListPage = () => {
     return () => clearTimeout(delay);
   }, [q, dispatch]);
 
-  // Map table row → initialValues for form (fields per your API)
+  // convert row to form initial values
   const toInitialValues = (r) => ({
     id: r.user_id,
     name: r.name ?? "",
@@ -93,35 +87,24 @@ const UserListPage = () => {
     dob: r.date_of_birth ?? "",
     bio: r.bio ?? "",
     otp: r.otp ?? "",
-    createdAt: r.created_at ?? r.createdAt ?? "",
-    updatedAt: r.updated_at ?? r.updatedAt ?? "",
+    createdAt: r.created_at ?? "",
+    updatedAt: r.updated_at ?? "",
   });
 
-  // open edit modal
   const openEdit = (row) => {
     setFormMode("edit");
     setFormInitialValues(toInitialValues(row));
     setFormOpen(true);
 
     if (!location.pathname.endsWith("/edit")) {
-      navigate("edit");
+      navigate("edit", { state: { row } });
     }
   };
+   
 
-  const closeForm = () => {
-    setFormOpen(false);
-    if (location.pathname.endsWith("/edit")) {
-      navigate("/dashboard/userlistpage", { replace: true });
-    }
-  };
 
-  // wire table actions
-  const handleView = (row) =>
+  const handleView = (row) => {
     alert(`Viewing user: ${row.name ?? row.user_id}`);
-
-  const handleEdit = (row) => {
-    // Navigate to edit page and pass selected row in location.state
-    navigate("/dashboard/userlistpage/edit", { state: { row } });
   };
 
   const handleDelete = (row) => {
@@ -135,7 +118,7 @@ const UserListPage = () => {
     }
   };
 
-  // Columns aligned to your API fields
+  // Table columns
   const columns = useMemo(
     () => [
       { key: "user_id", label: "ID" },
@@ -170,9 +153,9 @@ const UserListPage = () => {
         render: (row) => (
           <div style={{ display: "flex", justifyContent: "center" }}>
             <AppButtonRow
-              onView={() => alert(`View: ${row.name}`)}
+              onView={() => handleView(row)}
               onEdit={() => openEdit(row)}
-              onDelete={() => alert(`Delete: ${row.name}`)}
+              onDelete={() => handleDelete(row)}
             />
           </div>
         ),
@@ -186,6 +169,20 @@ const UserListPage = () => {
     return users.slice(start, start + itemsPerPage);
   }, [users, currentPage]);
 
+  //  FIX: Missing styles
+  const pageBackground = {
+    backgroundColor: "#f8f9fa",
+    minHeight: "100vh",
+    padding: "20px",
+  };
+
+  const containerStyles = {
+    background: "#fff",
+    borderRadius: "10px",
+    padding: "20px",
+    boxShadow: "0 0 15px rgba(0,0,0,0.1)",
+  };
+
   return (
     <div style={pageBackground}>
       <div style={containerStyles}>
@@ -193,41 +190,39 @@ const UserListPage = () => {
         <div
           style={{
             display: "flex",
-            justifyContent:
-              screenSize === "mobile" ? "center" : "space-between",
+            justifyContent: screen === "mobile" ? "center" : "space-between",
             alignItems: "center",
             marginBottom: "10px",
             borderBottom: "2px solid #eee",
             paddingBottom: "10px",
-            flexDirection: screenSize === "mobile" ? "column" : "row",
+            flexDirection: screen === "mobile" ? "column" : "row",
           }}
         >
           <h4
             style={{
               fontWeight: 600,
-              fontSize: screenSize === "mobile" ? "1.1rem" : "1.25rem",
-              marginBottom: screenSize === "mobile" ? "10px" : "0",
-              textAlign: screenSize === "mobile" ? "center" : "left",
+              fontSize: screen === "mobile" ? "1.1rem" : "1.25rem",
+              marginBottom: screen === "mobile" ? "10px" : "0",
+              textAlign: screen === "mobile" ? "center" : "left",
             }}
           >
             User List
           </h4>
 
-          {/* 🔍 Search only */}
+          {/* Search */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              justifyContent:
-                screenSize === "mobile" ? "center" : "flex-end",
+              justifyContent: screen === "mobile" ? "center" : "flex-end",
               gap: "12px",
-              width: screenSize === "mobile" ? "100%" : "auto",
+              width: screen === "mobile" ? "100%" : "auto",
             }}
           >
             <div
               style={{
                 position: "relative",
-                width: screenSize === "mobile" ? "100%" : "220px",
+                width: screen === "mobile" ? "100%" : "220px",
               }}
             >
               <i
@@ -268,7 +263,7 @@ const UserListPage = () => {
               columns={columns}
               data={pagedUsers}
               tableProps={{
-                size: screenSize === "mobile" ? "sm" : "md",
+                size: screen === "mobile" ? "sm" : "md",
                 responsive: true,
               }}
             />

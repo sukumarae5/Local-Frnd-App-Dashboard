@@ -45,7 +45,7 @@ const UserEditFormDesign = () => {
   const initialValues = useMemo(() => toInitialValues(row), [row]);
 
   const handleClose = () => {
-    navigate("/dashboard/userlistpage", { replace: true });
+    navigate("/userlistpage", { replace: true });
   };
 
   // 🔔 handle backend error ONLY after this form submitted
