@@ -1,4 +1,3 @@
-// src/pages/users/UserListPage.jsx
 import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -13,15 +12,20 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 
 const UserListPage = () => {
   const [q, setQ] = useState("");
-  const [screenSize, setScreenSize] = useState("desktop");
 
+  const [screen, setScreen] = useState("desktop"); // <-- ADDED
+
+  // Modal state
+  const [formOpen, setFormOpen] = useState(false);
+  const [formMode, setFormMode] = useState("edit"); // only edit
+  const [formInitialValues, setFormInitialValues] = useState({});
+
+  // Pagination (client-side)
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const dispatch = useDispatch();
   const { loading, user, error } = useSelector((s) => s.user || {});
-
-  const navigate = useNavigate();
 
   // Normalize: API may return single object or array
   const users = useMemo(() => {
@@ -30,28 +34,39 @@ const UserListPage = () => {
     return [];
   }, [user]);
 
-  // responsive
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // ✔ Detect Screen Size
   useEffect(() => {
     const handleResize = () => {
-      const width = window.innerWidth;
-      if (width <= 576) setScreenSize("mobile");
-      else if (width <= 992) setScreenSize("tablet");
-      else setScreenSize("desktop");
+      const w = window.innerWidth;
+      if (w <= 576) setScreen("mobile");
+      else if (w <= 992) setScreen("tablet");
+      else setScreen("desktop");
     };
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // initial fetch
+
   useEffect(() => {
     dispatch(userFetchRequest());
   }, [dispatch]);
 
-  // reset page when user count changes
+  // Search Debounce
   useEffect(() => {
     setCurrentPage(1);
   }, [users.length]);
+
+  // lock scroll ONLY when modal open
+  useEffect(() => {
+    if (!formOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => (document.body.style.overflow = prev);
+  }, [formOpen]);
 
   // debounce search
   useEffect(() => {
@@ -61,6 +76,46 @@ const UserListPage = () => {
     return () => clearTimeout(delay);
   }, [q, dispatch]);
 
+  // Map table row → initialValues for form (fields per your API)
+  const toInitialValues = (r) => ({
+    id: r.user_id,
+    name: r.name ?? "",
+    username: r.username ?? "",
+    mobile: r.mobile_number ?? "",
+    email: r.email ?? "",
+    age: r.age ?? "",
+    gender: r.gender ?? "",
+    profileStatus: r.profile_status ?? "",
+    status: r.status ?? "",
+    coins: r.coin_balance ?? "",
+    lat: r.location_lat ?? "",
+    lon: r.location_log ?? "",
+    dob: r.date_of_birth ?? "",
+    bio: r.bio ?? "",
+    otp: r.otp ?? "",
+    createdAt: r.created_at ?? r.createdAt ?? "",
+    updatedAt: r.updated_at ?? r.updatedAt ?? "",
+  });
+
+  // open edit modal
+  const openEdit = (row) => {
+    setFormMode("edit");
+    setFormInitialValues(toInitialValues(row));
+    setFormOpen(true);
+
+    if (!location.pathname.endsWith("/edit")) {
+      navigate("edit");
+    }
+  };
+
+  const closeForm = () => {
+    setFormOpen(false);
+    if (location.pathname.endsWith("/edit")) {
+      navigate("/dashboard/userlistpage", { replace: true });
+    }
+  };
+
+  // wire table actions
   const handleView = (row) =>
     alert(`Viewing user: ${row.name ?? row.user_id}`);
 
@@ -115,9 +170,9 @@ const UserListPage = () => {
         render: (row) => (
           <div style={{ display: "flex", justifyContent: "center" }}>
             <AppButtonRow
-              onView={() => handleView(row)}
-              onEdit={() => handleEdit(row)}
-              onDelete={() => handleDelete(row)}
+              onView={() => alert(`View: ${row.name}`)}
+              onEdit={() => openEdit(row)}
+              onDelete={() => alert(`Delete: ${row.name}`)}
             />
           </div>
         ),
@@ -125,36 +180,6 @@ const UserListPage = () => {
     ],
     []
   );
-
-  const containerStyles = {
-    position: "fixed",
-    top:
-      screenSize === "mobile"
-        ? "200px"
-        : screenSize === "tablet"
-        ? "200px"
-        : "230px",
-    left: "100px",
-    right: screenSize === "mobile" ? "20px" : "60px",
-    bottom: "20px",
-    backgroundColor: "#f7f7f7",
-    borderRadius: screenSize === "mobile" ? "8px" : "12px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-    padding: screenSize === "mobile" ? "16px" : "20px 26px",
-    overflow: "auto",
-    display: "flex",
-    flexDirection: "column",
-    transition: "all 0.3s ease",
-  };
-
-  const pageBackground = {
-    position: "absolute",
-    top: screenSize === "desktop" ? "80px" : "40px",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "#f8f9fc",
-  };
 
   const pagedUsers = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
