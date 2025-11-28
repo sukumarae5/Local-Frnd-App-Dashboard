@@ -7,7 +7,7 @@ export const PHOTOS_DELETE_REQUEST = "photos/DELETE_REQUEST";
 export const PHOTOS_DELETE_SUCCESS = "photos/DELETE_SUCCESS";
 export const PHOTOS_DELETE_FAILURE = "photos/DELETE_FAILURE";
 
-// export const PHOTOS__REQUEST = "photos/DELETE_REQUEST";
-// export const PHOTOS_DELETE_SUCCESS = "photos/DELETE_SUCCESS";
-// export const PHOTOS_DELETE_FAILURE = "photos/DELETE_FAILURE";
 
+export const PHOTOS_EDIT_REQUEST = "photos/EDIT_REQUEST";
+ export const PHOTOS_EDIT_SUCCESS = "photos/EDIT_SUCCESS";
+ export const PHOTOS_EDIT_FAILURE = "photos/EDIT_FAILURE";

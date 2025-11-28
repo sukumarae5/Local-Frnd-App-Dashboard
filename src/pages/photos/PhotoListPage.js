@@ -1,4 +1,11 @@
-import React, { useEffect, useMemo, useCallback, useState } from "react";
+// src/pages/photos/PhotoListPage.js
+
+import React, {
+  useEffect,
+  useMemo,
+  useCallback,
+  useState,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchPhotosRequest,
@@ -6,10 +13,16 @@ import {
 } from "../../features/photos/photosAction";
 import AppTable from "../../components/tables/AppTable";
 import { AppButtonRow } from "../../components/button/AppButton";
+import { Modal } from "react-bootstrap";
+import PhotoForms from "../../components/forms/PhotoForms";
 
 const PhotoListPage = () => {
   const dispatch = useDispatch();
   const [search, setSearch] = useState("");
+
+  // For modal
+  const [showModal, setShowModal] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
 
   // reducer: { photos, isLoadingList, error }
   const { photos = [], isLoadingList, error } = useSelector(
@@ -38,7 +51,8 @@ const PhotoListPage = () => {
 
   const handleEdit = useCallback((row) => {
     console.log("Edit photo:", row);
-    // TODO: navigate to edit page if needed
+    setSelectedPhoto(row);
+    setShowModal(true);
   }, []);
 
   const handleDelete = useCallback(
@@ -48,7 +62,6 @@ const PhotoListPage = () => {
           `Are you sure you want to delete photo with ID ${row.photo_id}?`
         )
       ) {
-        // ✅ Send both user_id and photo_id
         dispatch(
           DeletePhotosRequest({
             user_id: row.user_id,
@@ -59,6 +72,11 @@ const PhotoListPage = () => {
     },
     [dispatch]
   );
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedPhoto(null);
+  };
 
   const columns = useMemo(
     () => [
@@ -169,6 +187,39 @@ const PhotoListPage = () => {
       </div>
 
       <AppTable columns={columns} data={filteredPhotos} />
+
+      {/* EDIT MODAL */}
+      <Modal
+        show={showModal}
+        onHide={handleCloseModal}
+        size="lg"
+        centered
+        backdrop="static"
+        style={{
+          marginTop: "40px",
+          marginLeft: "20px",
+          padding: "0px",
+        }}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <h2 style={{ marginLeft: "50px" }}>Edit Photo</h2>
+          </Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body
+          style={{
+            padding: "20px",
+          }}
+        >
+          {selectedPhoto && (
+            <PhotoForms
+              initialPhoto={selectedPhoto}
+              onClose={handleCloseModal}
+            />
+          )}
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
