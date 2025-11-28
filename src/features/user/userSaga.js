@@ -31,6 +31,8 @@ function* fetchUsers() {
 function* editUsers(action) {
   try {
     const { id, data } = action.payload || {};
+    console.log(id,data)
+
     if (!id) throw new Error("Missing user id for edit");
 
     const response = yield call(axios.put, `${EDIT_API}/${id}`, data, {
