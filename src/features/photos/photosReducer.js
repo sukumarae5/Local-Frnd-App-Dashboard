@@ -1,3 +1,5 @@
+// src/features/photos/photosReducer.js
+
 import {
   PHOTOS_FETCH_REQUEST,
   PHOTOS_FETCH_SUCCESS,
@@ -5,20 +7,25 @@ import {
   PHOTOS_DELETE_REQUEST,
   PHOTOS_DELETE_SUCCESS,
   PHOTOS_DELETE_FAILURE,
-} from "../photos/photosType";
+  PHOTOS_EDIT_REQUEST,
+  PHOTOS_EDIT_SUCCESS,
+  PHOTOS_EDIT_FAILURE,
+} from "./photosType";
 
 const initialState = {
-  photos: [], // store all photos in one array
+  photos: [],        // store all photos in one array
   isLoadingList: false,
   isUploading: false,
-  deletingIds: {}, // track per-id delete state (by photo_id)
+  deletingIds: {},   // track per-id delete state
+  editingIds: {},    // track per-id edit state
   error: null,
 };
 
 export default function photosReducer(state = initialState, action) {
+  console.log(action);
+  
   switch (action.type) {
     // --- FETCH LIST ---
-
     case PHOTOS_FETCH_REQUEST:
       return {
         ...state,
@@ -44,7 +51,6 @@ export default function photosReducer(state = initialState, action) {
       };
 
     // --- DELETE SINGLE PHOTO ---
-
     case PHOTOS_DELETE_REQUEST: {
       const { photo_id } = action.payload || {};
       if (!photo_id) return state;
@@ -68,8 +74,9 @@ export default function photosReducer(state = initialState, action) {
       return {
         ...state,
         deletingIds: restDeleting,
-        // remove only this photo from list
-        photos: state.photos.filter((p) => p.photo_id !== photo_id),
+        photos: state.photos.filter(
+          (p) => String(p.photo_id) !== String(photo_id)
+        ),
         error: null,
       };
     }
@@ -77,8 +84,49 @@ export default function photosReducer(state = initialState, action) {
     case PHOTOS_DELETE_FAILURE:
       return {
         ...state,
-        deletingIds: {}, // or keep as-is if you want per-id info
+        deletingIds: {},
         error: action.payload || "Failed to delete photo",
+      };
+
+    // --- EDIT SINGLE PHOTO ---
+    case PHOTOS_EDIT_REQUEST: {
+      const { photo_id } = action.payload || {};
+      if (!photo_id) return state;
+
+      return {
+        ...state,
+        editingIds: {
+          ...state.editingIds,
+          [photo_id]: true,
+        },
+        error: null,
+      };
+    }
+
+    case PHOTOS_EDIT_SUCCESS: {
+      const updatedPhoto = action.payload;
+      if (!updatedPhoto || !updatedPhoto.photo_id) return state;
+
+      const id = updatedPhoto.photo_id;
+      const { [id]: _, ...restEditing } = state.editingIds;
+
+      return {
+        ...state,
+        editingIds: restEditing,
+        photos: state.photos.map((p) =>
+          String(p.photo_id) === String(updatedPhoto.photo_id)
+            ? updatedPhoto
+            : p
+        ),
+        error: null,
+      };
+    }
+
+    case PHOTOS_EDIT_FAILURE:
+      return {
+        ...state,
+        editingIds: {},
+        error: action.payload || "Failed to edit photo",
       };
 
     default:
