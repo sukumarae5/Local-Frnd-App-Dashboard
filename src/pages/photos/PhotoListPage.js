@@ -197,13 +197,13 @@ const PhotoListPage = () => {
         backdrop="static"
         style={{
           marginTop: "40px",
-          marginLeft: "20px",
-          padding: "0px",
+          marginLeft: "40px",
+          padding: "10px",
         }}
       >
-        <Modal.Header closeButton>
+        <Modal.Header closeButton style={{marginRight:'10px'}}>
           <Modal.Title>
-            <h2 style={{ marginLeft: "50px" }}>Edit Photo</h2>
+            <h2 style={{ marginLeft: "10px" }}>Edit Photo</h2>
           </Modal.Title>
         </Modal.Header>
 

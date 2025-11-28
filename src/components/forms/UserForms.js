@@ -56,18 +56,20 @@ export default function UserForm({
     zIndex: 9999,
   };
 
-  const modalStyle = {
-    width: "min(720px,96vw)",
-    maxHeight: "90vh",
-    overflow: "auto",
-    background: "#0b0014",
-    border: "1px solid rgba(255,255,255,0.08)",
-    borderRadius: 12,
-    boxShadow: "0 12px 36px rgba(0,0,0,0.6)",
-    padding: "24px 28px",
-    fontFamily: "Inter,sans-serif",
-    color: "#f3f4f6",
-  };
+ const modalStyle = { 
+  width: "min(720px,96vw)", 
+  maxHeight: "90vh", 
+  overflow: "auto", 
+  background: "#0b0014",
+   border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: 12, 
+  boxShadow: "0 12px 36px rgba(0,0,0,0.6)",
+   padding: "24px 28px",
+   fontFamily: "Inter,sans-serif", 
+   color: "#f3f4f6", 
+   marginTop: 40, 
+   marginLeft: 80,
+   };
 
   const inputStyle = {
     width: "100%",
@@ -134,7 +136,9 @@ export default function UserForm({
     </div>
   );
 
-  const Row = ({ children }) => <div style={rowStyle}>{children}</div>;
+  const Row = ({ children, className = "" }) => (
+  <div className={`user-row ${className}`}>{children}</div>
+);
 
   // --- SUBMIT ---
   const handleSubmit = (e) => {
@@ -185,6 +189,53 @@ export default function UserForm({
   };
 
   return (
+    <>
+    <style>
+  {`
+    .user-modal {
+      margin: 30px auto;
+      width: min(720px, 90vw);
+    }
+
+    @media (max-width: 1200px) {
+      .user-modal {
+        margin-left: 60px;
+        margin-right: 60px;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .user-modal {
+        margin-left: 50px;
+        margin-right: 50px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .user-modal {
+        margin-left: 30px !important;
+        margin-right: 30px !important;
+        width: calc(100vw - 60px) !important;
+      }
+    }
+
+    /* Row styles */
+    .user-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr; /* default: 2 columns */
+      gap: 16px;
+    }
+
+    /* Only mobile: stack fields one by one */
+    @media (max-width: 576px) {
+      .user-row {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+      }
+    }
+  `}
+</style>
+
     <div style={backdropStyle} onClick={onClose}>
       <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
         <div
@@ -396,5 +447,6 @@ export default function UserForm({
         </form>
       </div>
     </div>
+    </>
   );
 }

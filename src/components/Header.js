@@ -10,7 +10,6 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Layout adjustments
   const headerMarginLeft = isMobile ? "0px" : sidebarOpen ? "250px" : "80px";
   const headerWidth = isMobile
     ? "100%"
@@ -32,44 +31,42 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
         padding: "0 20px",
         display: "flex",
         alignItems: "center",
-        justifyContent: "flex-end", // right-aligned content
+        justifyContent: "flex-end",   // <-- EVERYTHING moves to the RIGHT
+        gap: "15px",                   // spacing between items
       }}
     >
-      <div
-        className="d-flex align-items-center gap-2"
+
+      {/* TITLE on right side */}
+      <h6
+        className="text-white m-0"
         style={{
-          transition: "all 0.3s ease-in-out",
+          fontSize: "1rem",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
         }}
       >
-        {/* ✅ Title - always visible (desktop + mobile) */}
-        <h6
-          className="text-white m-0"
+        Welcome Admin Panel
+      </h6>
+
+      {/* TOGGLE on right side (only mobile) */}
+      {isMobile && (
+        <Button
+          variant="light"
+          size="sm"
+          onClick={toggleSidebar}
           style={{
-            whiteSpace: "nowrap",
-            fontSize: "1rem",
+            width: "38px",
+            height: "38px",
+            fontSize: "20px",
+            fontWeight: "bold",
+            borderRadius: "6px",
           }}
         >
-          Welcome Admin Panel
-        </h6>
+          {sidebarOpen ? "×" : "☰"}
+        </Button>
+      )}
 
-        {/* ✅ Toggle - visible only on mobile */}
-        {isMobile && (
-          <Button
-            variant="light"
-            size="sm"
-            onClick={toggleSidebar}
-            style={{
-              width: "38px",
-              height: "38px",
-              fontSize: "20px",
-              fontWeight: "bold",
-              borderRadius: "6px",
-            }}
-          >
-            {sidebarOpen ? "×" : "☰"}
-          </Button>
-        )}
-      </div>
     </Navbar>
   );
 };
