@@ -70,7 +70,7 @@ const Dashboard = () => {
             className="flex-grow-1 overflow-auto pt-4 px-3"
             style={{
               marginTop: "170px",
-              marginLeft: isMobile ? "0px" : "70px",
+              marginLeft: isMobile ? "20px" : "70px",
               paddingBottom: "0px",
             }}
           >
