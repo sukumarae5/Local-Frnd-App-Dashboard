@@ -1,86 +1,40 @@
-import React, { useEffect, useState } from "react";
-import { Table } from "react-bootstrap";
+// ✅ src/components/tables/AppTable.js
+import React from "react";
+import { Table, Button } from "react-bootstrap";
+import { PencilSquare, X } from "react-bootstrap-icons";
 
-export default function AppTable({ columns = [], data = [], tableProps = {} }) {
-  const [screen, setScreen] = useState("desktop");
-
-  // Detect screen size
-  useEffect(() => {
-    const updateSize = () => {
-      if (window.innerWidth <= 576) setScreen("mobile");
-      else if (window.innerWidth <= 992) setScreen("tablet");
-      else setScreen("desktop");
-    };
-    updateSize();
-    window.addEventListener("resize", updateSize);
-    return () => window.removeEventListener("resize", updateSize);
-  }, []);
-
-  const responsiveStyles = {
-    mobile: {
-      margin: "10px",
-      padding: "0.5rem",
-      cellPadding: "0.4rem",
-      fontSize: "12px",
-    },
-    tablet: {
-      margin: "20px",
-      padding: "1rem",
-      cellPadding: "0.7rem",
-      fontSize: "14px",
-    },
-    desktop: {
-      margin: "40px",
-      padding: "1.5rem",
-      cellPadding: "0.9rem",
-      fontSize: "15px",
-    },
-  };
-
-  const s = responsiveStyles[screen];
-
+export default function AppTable({ columns = [], data = [] }) {
   return (
-    <div
-      style={{
-        margin: s.margin,
-        padding: s.padding,
-        backgroundColor: "#fff",
-        borderRadius: "12px",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-        overflowX: "auto",
-        minWidth: "300px",
-      }}
-    >
+    <div className="table-responsive rounded-4 shadow-lg overflow-hidden">
       <Table
-        striped
-        bordered
         hover
         responsive
+        className="mb-0"
         style={{
-          fontSize: s.fontSize,
+          /* 🔥 PURPLE → PINK GRADIENT */
+          background:
+            "linear-gradient(180deg, #5B2D8B 0%, #7B3FE4 40%, #7527b0ff 70%, #6f15a4ff 100%)",
           borderCollapse: "separate",
           borderSpacing: 0,
-          border: "1px solid #dee2e6",
-          borderRadius: "10px",
-          width: "100%",
-          overflow: "hidden",
+          borderRadius: "16px",
+
+          /* ✅ FORCE WHITE TEXT */
+          color: "#fff",
         }}
-        {...tableProps}
       >
+        {/* ================= HEADER ================= */}
         <thead>
           <tr>
             {columns.map((col) => (
               <th
                 key={col.key}
+                className="fw-bold text-nowrap"
                 style={{
-                  background: "linear-gradient(135deg, #343a40, #495057)",
-                  color: "white",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.03em",
-                  fontWeight: 600,
-                  padding: s.cellPadding,
-                  textAlign: "left",
-                  whiteSpace: "nowrap",
+                  background: "transparent",
+                  color: "#fff",
+                  padding: "16px",
+                  borderBottom: "2px solid rgba(255,255,255,0.6)",
+                  textShadow: "0 1px 6px rgba(255,255,255,0.25)",
                 }}
               >
                 {col.label}
@@ -89,16 +43,16 @@ export default function AppTable({ columns = [], data = [], tableProps = {} }) {
           </tr>
         </thead>
 
+        {/* ================= BODY ================= */}
         <tbody>
           {data.length === 0 ? (
             <tr>
               <td
                 colSpan={columns.length}
                 style={{
-                  textAlign: "center",
-                  padding: "1rem",
-                  fontStyle: "italic",
-                  color: "#6c757d",
+                  padding: "16px",
+                  color: "#fff",
+                  opacity: 0.85,
                 }}
               >
                 No records found
@@ -107,28 +61,64 @@ export default function AppTable({ columns = [], data = [], tableProps = {} }) {
           ) : (
             data.map((row, idx) => (
               <tr
-                key={row.id ?? idx}
-                style={{ transition: "0.2s ease-in-out", backgroundColor: "#fff" }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#f1f3f5";
-                  e.currentTarget.style.transform = "scale(1.01)";
+                key={row?.photo_id || row?.id || idx}
+                style={{
+                  background: "transparent",
+                  transition: "all 0.25s ease",
+                  color: "#fff",
                 }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#fff";
-                  e.currentTarget.style.transform = "scale(1)";
-                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background =
+                    "rgba(247, 37, 133, 0.15)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "transparent")
+                }
               >
                 {columns.map((col) => (
                   <td
                     key={col.key}
                     style={{
-                      border: "1px solid #dee2e6",
-                      padding: s.cellPadding,
+                      padding: "14px 16px",
+                      borderBottom: "1px solid rgba(255,255,255,0.35)",
                       verticalAlign: "middle",
-                      whiteSpace: "nowrap",
+                      background: "transparent",
+                      color: "#fff",
                     }}
                   >
-                    {col.render ? col.render(row) : row[col.key]}
+                    {/* ✅ FIX: If render exists, use it */}
+                    {typeof col.render === "function" ? (
+                      col.render(row, idx)
+                    ) : col.key === "actions" ? (
+                      /* fallback buttons if no render provided */
+                      <div className="d-flex gap-2">
+                        <Button
+                          size="sm"
+                          className="rounded-3"
+                          style={{
+                            backgroundColor: "#FFD60A",
+                            border: "none",
+                            color: "#000",
+                          }}
+                        >
+                          <PencilSquare />
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          className="rounded-3"
+                          style={{
+                            backgroundColor: "#E63946",
+                            border: "none",
+                            color: "#fff",
+                          }}
+                        >
+                          <X size={18} />
+                        </Button>
+                      </div>
+                    ) : (
+                      row?.[col.key] ?? "-"
+                    )}
                   </td>
                 ))}
               </tr>

@@ -173,65 +173,8 @@ console.log(editId,apiData)
         zIndex: 1050,
       }}
     >
-      <div
-        style={{
-          backgroundColor: "#ffffff",
-          borderRadius: "16px",
-          width: "100%",
-          maxWidth: "720px",
-          boxShadow: "0 20px 45px rgba(15, 23, 42, 0.45)",
-          padding: "24px 24px 20px 24px",
-          maxHeight: "90vh",
-          overflow: "auto",
-        }}
-      >
-        <div
-          style={{
-            marginBottom: "16px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            borderBottom: "1px solid #e5e7eb",
-            paddingBottom: "8px",
-          }}
-        >
-          <div>
-            <h3
-              style={{
-                margin: 0,
-                fontSize: "1.35rem",
-                fontWeight: 600,
-                color: "#111827",
-              }}
-            >
-              Edit User
-            </h3>
-            <p
-              style={{
-                margin: 0,
-                marginTop: "4px",
-                fontSize: "0.85rem",
-                color: "#6b7280",
-              }}
-            >
-              Update profile details for user ID #{row.user_id}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleClose}
-            style={{
-              border: "none",
-              background: "transparent",
-              fontSize: "1.1rem",
-              cursor: "pointer",
-              color: "#6b7280",
-            }}
-          >
-            ✕
-          </button>
-        </div>
-
+      
+        
         <UserForm
           open={true}
           mode="edit"
@@ -240,7 +183,7 @@ console.log(editId,apiData)
           onSubmit={handleFormSubmit}
           backendErrors={backendFieldErrors} // 👈 pass backend-required fields
         />
-      </div>
+      
     </div>
   );
 };

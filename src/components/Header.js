@@ -22,7 +22,7 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
       fixed="top"
       variant="dark"
       style={{
-        background: "linear-gradient(180deg, #0a0a0a, #1a1919, #262323)",
+        background: "#2F3545", // ✅ requested background color
         height: "60px",
         zIndex: 4000,
         marginLeft: headerMarginLeft,
@@ -31,11 +31,11 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
         padding: "0 20px",
         display: "flex",
         alignItems: "center",
-        justifyContent: "flex-end",   // <-- EVERYTHING moves to the RIGHT
-        gap: "15px",                   // spacing between items
+        justifyContent: "flex-end",
+        gap: "15px",
+        borderBottom: "1px solid rgba(255,255,255,0.08)",
       }}
     >
-
       {/* TITLE on right side */}
       <h6
         className="text-white m-0"
@@ -66,7 +66,6 @@ const Header = ({ toggleSidebar, sidebarOpen }) => {
           {sidebarOpen ? "×" : "☰"}
         </Button>
       )}
-
     </Navbar>
   );
 };
