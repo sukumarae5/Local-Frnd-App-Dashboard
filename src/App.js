@@ -4,7 +4,7 @@ import AppRouter from './routes/AppRouter'
 
 const App = () => {
   return (
-    <div>
+    <div >
       <RouterProvider router={AppRouter}/>
     </div>
   )

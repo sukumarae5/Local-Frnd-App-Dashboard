@@ -57,7 +57,7 @@ const Dashboard = () => {
           sm={sidebarOpen ? 9 : 11}
           md={sidebarOpen ? 10 : 11}
           className="d-flex flex-column position-relative"
-          style={{ backgroundColor: "#f8f9fa", height: "100%" }}
+          style={{ backgroundColor: "#0d0d0dff", height: "100%" }}
         >
           {/* HEADER */}
           <Header
@@ -68,7 +68,7 @@ const Dashboard = () => {
           {/* SCROLLABLE OUTLET CONTENT */}
           <div
             className="flex-grow-1 overflow-auto pt-4 px-3"
-            style={{
+            style={{  
               marginTop: "170px",
               marginLeft: isMobile ? "20px" : "70px",
               paddingBottom: "0px",
@@ -79,7 +79,7 @@ const Dashboard = () => {
 
           {/* BOTTOM NAVBAR */}
           <div
-            className="w-100 position-sticky bottom-0"
+            className="w-50 position-sticky bottom-0"
             style={{ zIndex: 10 }}
           >
             <BottomNavbar

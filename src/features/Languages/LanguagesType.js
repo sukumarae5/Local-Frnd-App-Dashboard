@@ -1,0 +1,21 @@
+// src/features/Languages/LanguagesType.js
+
+// ================= FETCH =================
+export const FETCH_LANGUAGES_REQUEST = "FETCH_LANGUAGES_REQUEST";
+export const FETCH_LANGUAGES_SUCCESS = "FETCH_LANGUAGES_SUCCESS";
+export const FETCH_LANGUAGES_FAILURE = "FETCH_LANGUAGES_FAILURE";
+
+// ================= DELETE =================
+export const DELETE_LANGUAGE_REQUEST = "DELETE_LANGUAGE_REQUEST";
+export const DELETE_LANGUAGE_SUCCESS = "DELETE_LANGUAGE_SUCCESS";
+export const DELETE_LANGUAGE_FAILURE = "DELETE_LANGUAGE_FAILURE";
+
+// ================= ADD =================
+export const ADD_LANGUAGE_REQUEST = "ADD_LANGUAGE_REQUEST";
+export const ADD_LANGUAGE_SUCCESS = "ADD_LANGUAGE_SUCCESS";
+export const ADD_LANGUAGE_FAILURE = "ADD_LANGUAGE_FAILURE";
+
+// ================= EDIT / UPDATE =================
+export const EDIT_LANGUAGE_REQUEST = "EDIT_LANGUAGE_REQUEST";
+export const EDIT_LANGUAGE_SUCCESS = "EDIT_LANGUAGE_SUCCESS";
+export const EDIT_LANGUAGE_FAILURE = "EDIT_LANGUAGE_FAILURE";

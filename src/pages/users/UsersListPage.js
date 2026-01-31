@@ -33,7 +33,7 @@ const UserListPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Screen size detection
+  /* ================= SCREEN SIZE ================= */
   useEffect(() => {
     const handleResize = () => {
       const w = window.innerWidth;
@@ -41,20 +41,22 @@ const UserListPage = () => {
       else if (w <= 992) setScreen("tablet");
       else setScreen("desktop");
     };
-
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  /* ================= FETCH ================= */
   useEffect(() => {
     dispatch(userFetchRequest());
   }, [dispatch]);
 
+  /* ================= RESET PAGE ================= */
   useEffect(() => {
     setCurrentPage(1);
   }, [users.length]);
 
+  /* ================= FORM SCROLL LOCK ================= */
   useEffect(() => {
     if (!formOpen) return;
     const prev = document.body.style.overflow;
@@ -62,7 +64,7 @@ const UserListPage = () => {
     return () => (document.body.style.overflow = prev);
   }, [formOpen]);
 
-  // debounce search
+  /* ================= SEARCH (DEBOUNCE) ================= */
   useEffect(() => {
     const delay = setTimeout(() => {
       dispatch(userFetchRequest(q));
@@ -70,7 +72,7 @@ const UserListPage = () => {
     return () => clearTimeout(delay);
   }, [q, dispatch]);
 
-  // convert row to form initial values
+  /* ================= EDIT ================= */
   const toInitialValues = (r) => ({
     id: r.user_id,
     name: r.name ?? "",
@@ -100,8 +102,6 @@ const UserListPage = () => {
       navigate("edit", { state: { row } });
     }
   };
-   
-
 
   const handleView = (row) => {
     alert(`Viewing user: ${row.name ?? row.user_id}`);
@@ -109,16 +109,11 @@ const UserListPage = () => {
 
   const handleDelete = (row) => {
     if (window.confirm(`Are you sure to delete ${row.name ?? row.user_id}?`)) {
-      dispatch(
-        userDeleteRequest({
-          id: row.user_id,
-          data: row,
-        })
-      );
+      dispatch(userDeleteRequest({ id: row.user_id, data: row }));
     }
   };
 
-  // Table columns
+  /* ================= TABLE ================= */
   const columns = useMemo(
     () => [
       { key: "user_id", label: "ID" },
@@ -169,41 +164,66 @@ const UserListPage = () => {
     return users.slice(start, start + itemsPerPage);
   }, [users, currentPage]);
 
-  //  FIX: Missing styles
+  /* ================= STYLES (SPACING ONLY) ================= */
   const pageBackground = {
     backgroundColor: "#f8f9fa",
     minHeight: "100vh",
-    padding: "20px",
+    padding: screen === "mobile" ? "12px" : "20px",
   };
 
   const containerStyles = {
-    background: "#fff",
-    borderRadius: "10px",
-    padding: "20px",
+    background: "rgba(47, 53, 69, 0.79)",
+    borderRadius: "12px",
+    padding: screen === "mobile" ? "14px" : "20px",
     boxShadow: "0 0 15px rgba(0,0,0,0.1)",
+    marginTop:"50px"
+  };
+
+  const headerStyles = {
+    display: "flex",
+    justifyContent: screen === "mobile" ? "center" : "space-between",
+    alignItems: "center",
+    marginBottom: "16px",
+    paddingBottom: "12px",
+    borderBottom: "2px solid #eee",
+    flexDirection: screen === "mobile" ? "column" : "row",
+    gap: screen === "mobile" ? "10px" : "0",
+  };
+
+  const searchWrapper = {
+    position: "relative",
+    width: screen === "mobile" ? "100%" : "220px",
+  };
+
+  const searchIcon = {
+    position: "absolute",
+    top: "50%",
+    left: "10px",
+    transform: "translateY(-50%)",
+    color: "#888",
+    fontSize: "1rem",
+  };
+
+  const searchInput = {
+    width: "100%",
+    padding: "8px 12px 8px 34px",
+    borderRadius: "8px",
+    border: "2px solid #ced4da",
+    fontSize: "0.9rem",
   };
 
   return (
-    <div style={pageBackground}>
-      <div style={containerStyles}>
+      <div style={containerStyles}
+      
+      >
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: screen === "mobile" ? "center" : "space-between",
-            alignItems: "center",
-            marginBottom: "10px",
-            borderBottom: "2px solid #eee",
-            paddingBottom: "10px",
-            flexDirection: screen === "mobile" ? "column" : "row",
-          }}
-        >
+        <div style={headerStyles}>
           <h4
             style={{
               fontWeight: 600,
               fontSize: screen === "mobile" ? "1.1rem" : "1.25rem",
-              marginBottom: screen === "mobile" ? "10px" : "0",
-              textAlign: screen === "mobile" ? "center" : "left",
+              margin: 0,
+              color:"white"
             }}
           >
             User List
@@ -211,70 +231,50 @@ const UserListPage = () => {
 
           {/* Search */}
           <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: screen === "mobile" ? "center" : "flex-end",
-              gap: "12px",
-              width: screen === "mobile" ? "100%" : "auto",
-            }}
-          >
-            <div
-              style={{
-                position: "relative",
-                width: screen === "mobile" ? "100%" : "220px",
-              }}
-            >
-              <i
-                className="bi bi-search"
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "10px",
-                  transform: "translateY(-50%)",
-                  color: "#888",
-                  fontSize: "1rem",
-                }}
-              />
-              <input
-                type="text"
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Search..."
-                style={{
-                  width: "100%",
-                  padding: "6px 10px 6px 30px",
-                  borderRadius: "8px",
-                  border: "2px solid #ced4da",
-                  fontSize: "0.9rem",
-                }}
-              />
-            </div>
-          </div>
+  className="d-flex align-items-center px-3 py-2 rounded"
+  style={{
+    background: "linear-gradient(90deg, #D56CFF, #4F8EFF)",
+  }}
+>
+  <i className="bi bi-search text-white me-2" />
+
+  <input
+    type="text"
+    value={q}
+    onChange={(e) => setQ(e.target.value)}
+    placeholder="Search..."
+    className="form-control bg-transparent border-0 text-white"
+  />
+</div>
+
         </div>
 
         {/* Table */}
-        {loading && <p>Loading…</p>}
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {loading && <p style={{ margin: "12px 0" }}>Loading…</p>}
+        {error && <p style={{ color: "red", margin: "12px 0" }}>{error}</p>}
 
         {!loading && !error && (
           <>
-            <AppTable
-              columns={columns}
-              data={pagedUsers}
-              tableProps={{
-                size: screen === "mobile" ? "sm" : "md",
-                responsive: true,
-              }}
-            />
+            <div 
+            style={{ marginBottom: "10px" }}
+            >
+              <AppTable
+                columns={columns}
+                data={pagedUsers}
+                tableProps={{
+                  size: screen === "mobile" ? "sm" : "md",
+                  responsive: true,
+                }}
+              />
+            </div>
 
             <div
               style={{
                 display: "flex",
                 justifyContent: "space-between",
                 fontSize: 12,
-                marginTop: 8,
-                padding: "0 10px",
+                margin: "10px 0 6px",
+                padding: "0 6px",
               }}
             >
               <span style={{ opacity: 0.8 }}>
@@ -287,16 +287,18 @@ const UserListPage = () => {
               </span>
             </div>
 
-            <AppPagination
-              totalItems={users.length}
-              itemsPerPage={itemsPerPage}
-              currentPage={currentPage}
-              onPageChange={setCurrentPage}
-            />
+            <div style={{ marginTop: "6px" }}>
+              <AppPagination
+                totalItems={users.length}
+                itemsPerPage={itemsPerPage}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+              />
+            </div>
           </>
         )}
       </div>
-    </div>
+    
   );
 };
 
