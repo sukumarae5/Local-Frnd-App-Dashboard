@@ -1,9 +1,9 @@
 import React from "react";
 import { Button, ButtonGroup } from "react-bootstrap";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
 
-// 👉 Row action buttons (ONLY Edit / Delete)
-export const AppButtonRow = ({ onEdit, onDelete }) => {
+// 👉 Row action buttons (View / Edit / Delete)
+export const AppButtonRow = ({ onView, onEdit, onDelete }) => {
   const btnStyle = {
     display: "flex",
     alignItems: "center",
@@ -16,16 +16,25 @@ export const AppButtonRow = ({ onEdit, onDelete }) => {
 
   return (
     <ButtonGroup style={{ display: "flex", gap: "8px" }}>
+      
+      {onView && (
+        <Button size="sm" variant="info" style={btnStyle} onClick={onView}>
+          <FaEye />
+        </Button>
+      )}
+
       {onEdit && (
         <Button size="sm" variant="warning" style={btnStyle} onClick={onEdit}>
           <FaEdit />
         </Button>
       )}
+
       {onDelete && (
         <Button size="sm" variant="danger" style={btnStyle} onClick={onDelete}>
           <FaTrash />
         </Button>
       )}
+
     </ButtonGroup>
   );
 };
