@@ -13,6 +13,7 @@ const initialFormData = {
   image: null,
   redirect_url: "/coins",
   priority: "",
+  target_audience: "All",
   start_date: "",
   end_date: "",
   status: 1,
@@ -32,6 +33,7 @@ const OffersAddForm = ({ show, handleClose }) => {
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl);
       }
+
       setFormData(initialFormData);
       setPreviewUrl("");
       dispatch(resetAddOfferState());
@@ -70,6 +72,7 @@ const OffersAddForm = ({ show, handleClose }) => {
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
+
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
@@ -107,12 +110,17 @@ const OffersAddForm = ({ show, handleClose }) => {
       return;
     }
 
+    const targetAudience = formData.target_audience || "All";
+
     const payload = new FormData();
+
     payload.append("title", formData.title.trim());
     payload.append("description", formData.description.trim());
     payload.append("image", formData.image);
     payload.append("redirect_url", formData.redirect_url || "/coins");
     payload.append("priority", String(Number(formData.priority)));
+    payload.append("target_audience", targetAudience);
+    payload.append("gender", targetAudience);
     payload.append("start_date", formData.start_date || "");
     payload.append("end_date", formData.end_date || "");
     payload.append("status", String(Number(formData.status)));
@@ -131,7 +139,7 @@ const OffersAddForm = ({ show, handleClose }) => {
         style={{
           background: "#2d3447",
           borderBottom: "none",
-          marginTop:"15px"
+          marginTop: "15px",
         }}
       >
         <Modal.Title style={{ color: "#fff" }}>Add Offer</Modal.Title>
@@ -235,6 +243,24 @@ const OffersAddForm = ({ show, handleClose }) => {
             </Col>
 
             <Col md={6}>
+              <Form.Label style={{ color: "#fff" }}>Target Audience</Form.Label>
+              <Form.Select
+                name="target_audience"
+                value={formData.target_audience}
+                onChange={handleChange}
+                style={{
+                  borderRadius: "12px",
+                  height: "50px",
+                  background: "#eee",
+                }}
+              >
+                <option value="">ALL</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+              </Form.Select>
+            </Col>
+
+            <Col md={6}>
               <Form.Label style={{ color: "#fff" }}>Status</Form.Label>
               <Form.Select
                 name="status"
@@ -301,6 +327,7 @@ const OffersAddForm = ({ show, handleClose }) => {
             <Button type="submit" disabled={addLoading}>
               {addLoading ? "Saving..." : "Save"}
             </Button>
+
             <Button
               variant="secondary"
               onClick={handleClose}

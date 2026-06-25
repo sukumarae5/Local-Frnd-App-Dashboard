@@ -35,6 +35,17 @@ const OffersListPage = () => {
     return date.toLocaleDateString("en-GB");
   };
 
+  const formatTargetAudience = (row) => {
+    const value = row?.target_audience || row?.gender || "-";
+
+    if (value === "ALL" || value === "All" || value === "all") return "All";
+    if (value === "MALE" || value === "Male" || value === "male") return "Male";
+    if (value === "FEMALE" || value === "Female" || value === "female")
+      return "Female";
+
+    return value;
+  };
+
   const sortedOffers = useMemo(() => {
     return [...offers].sort(
       (a, b) => (a?.priority ?? 999) - (b?.priority ?? 999)
@@ -111,6 +122,11 @@ const OffersListPage = () => {
       key: "priority",
       label: "Priority",
       render: (row) => row?.priority ?? "-",
+    },
+    {
+      key: "target_audience",
+      label: "Target Audience",
+      render: (row) => formatTargetAudience(row),
     },
     {
       key: "start_date",
@@ -225,7 +241,13 @@ const OffersListPage = () => {
           )}
 
           {deleteLoading && (
-            <div style={{ color: "#fff", padding: "0 16px 16px", fontWeight: 600 }}>
+            <div
+              style={{
+                color: "#fff",
+                padding: "0 16px 16px",
+                fontWeight: 600,
+              }}
+            >
               Deleting offer...
             </div>
           )}
@@ -251,10 +273,7 @@ const OffersListPage = () => {
         </div>
       </div>
 
-      <OffersAddForm
-        show={showAddModal}
-        handleClose={handleCloseAddModal}
-      />
+      <OffersAddForm show={showAddModal} handleClose={handleCloseAddModal} />
 
       <OffersEditForm
         show={showEditModal}

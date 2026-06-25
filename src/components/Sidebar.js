@@ -26,20 +26,20 @@ export default function Sidebar({
     : "250px";
 
   const menuItems = [
-    { key: "dashboard", icon: "bi-speedometer2", label: "Dashboard", path: "/" },
-    { key: "userlistpage", icon: "bi-people", label: "User List", path: "/userlistpage" },
-    { key: "photolistpage", icon: "bi-image", label: "Photo List", path: "/photolistpage" },
-    { key: "languagepage", icon: "bi-translate", label: " Language", path: "/languagepage" },
-    { key: "calls", icon: "bi-telephone", label: "callspage", path: "/callspage" },
-    { key: "coins", icon: "bi-coin", label: "Coins", path: "/Coinspage" },
-    { key: "offers", icon: "bi-megaphone", label: "Offers", path: "/Offerspage" },
-    { key: "interest", icon: "icon: bi-heart", label: "Interest", path: "interestpage/" },
-    { key: "lifestyle", icon: "bi-gear", label: "lifestyle", path: "lifestylepage/" },
-    { key: "lifestylecategory", icon: "bi-gear", label: "lifestylecategory", path: "lifestylecategorypage/" },
-    { key: "moderation", icon: "bi-gear", label: "Moderation", path: "/" },
-    { key: "review", icon: "bi-person-check", label: "Profile Review", path: "/" },
-    { key: "monetization", icon: "bi-cash-stack", label: "Monetization", path: "/" },
-    { key: "analytics", icon: "bi-bar-chart-line", label: "Analytics", path: "/" },
+    { key: "dashboard", icon: "bi-speedometer2", label: "Dashboard", path: "/dashboard"},
+    { key: "userlistpage", icon: "bi-people", label: "User List", path: "/dashboard/userlistpage" },
+    { key: "photolistpage", icon: "bi-image", label: "Photo List", path: "/dashboard/photolistpage" },
+    { key: "languagepage", icon: "bi-translate", label: " Language", path: "/dashboard/languagepage" },
+    { key: "calls", icon: "bi-telephone", label: "callspage", path: "/dashboard/callspage" },
+    { key: "coins", icon: "bi-coin", label: "Coins", path: "/dashboard/Coinspage" },
+    { key: "offers", icon: "bi-megaphone", label: "Offers", path: "/dashboard/Offerspage" },
+    { key: "interest", icon: "icon: bi-heart", label: "Interest", path: "/dashboard/interestpage" },
+    { key: "lifestyle", icon: "bi-gear", label: "lifestyle", path: "/dashboard/lifestylepage" },
+    { key: "lifestylecategory", icon: "bi-gear", label: "lifestylecategory", path: "/dashboard/lifestylecategorypage" },
+    { key: "moderation", icon: "bi-gear", label: "Moderation", path: "/dashboard" },
+    { key: "review", icon: "bi-person-check", label: "Profile Review", path: "/dashboard" },
+    { key: "monetization", icon: "bi-cash-stack", label: "Monetization", path: "/dashboard" },
+    { key: "analytics", icon: "bi-bar-chart-line", label: "Analytics", path: "/dashboard" },
   ];
 
   // ✅ ONLY active menu color changed here

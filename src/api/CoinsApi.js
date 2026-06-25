@@ -1,1 +1,1 @@
-export const COINS=`http://${process.env.REACT_APP_API_IPADDRES}:8082/api/coin-packages`
+export const COINS=`${process.env.REACT_APP_API_IPADDRES}/api/coin-packages`

@@ -12,12 +12,11 @@ const initialFormData = {
   status: 1,
 };
 
-const CoinsAddForm = ({ show, onClose }) => {
+const CoinsAddForm = ({ show, onClose, onSuccess }) => {
   const dispatch = useDispatch();
 
   const {
     addLoading = false,
-    addSuccess = false,
     addError = "",
   } = useSelector((state) => state.coins || {});
 
@@ -28,13 +27,6 @@ const CoinsAddForm = ({ show, onClose }) => {
       setFormData(initialFormData);
     }
   }, [show]);
-
-  useEffect(() => {
-    if (addSuccess && show) {
-      setFormData(initialFormData);
-      onClose();
-    }
-  }, [addSuccess, show, onClose]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -63,6 +55,11 @@ const CoinsAddForm = ({ show, onClose }) => {
     setFormData(updated);
   };
 
+  const handleClose = () => {
+    setFormData(initialFormData);
+    if (onClose) onClose();
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -75,7 +72,16 @@ const CoinsAddForm = ({ show, onClose }) => {
       status: Number(formData.status),
     };
 
-    dispatch(addCoinsRequest(payload));
+    dispatch(
+      addCoinsRequest(payload, (message, isError = false) => {
+        alert(message || (isError ? "Something went wrong" : "Coin package added successfully"));
+
+        if (!isError) {
+          setFormData(initialFormData);
+          if (onSuccess) onSuccess();
+        }
+      })
+    );
   };
 
   const labelStyle = {
@@ -176,7 +182,7 @@ const CoinsAddForm = ({ show, onClose }) => {
 
       <Modal
         show={show}
-        onHide={onClose}
+        onHide={handleClose}
         centered
         backdrop="static"
         keyboard={!addLoading}
@@ -345,7 +351,7 @@ const CoinsAddForm = ({ show, onClose }) => {
 
                 <Button
                   type="button"
-                  onClick={onClose}
+                  onClick={handleClose}
                   disabled={addLoading}
                   style={transparentButtonStyle}
                 >

@@ -9,10 +9,13 @@ import {
 
 const getDateTimeLocalValue = (value) => {
   if (!value) return "";
+
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
+
   const offset = date.getTimezoneOffset();
   const localDate = new Date(date.getTime() - offset * 60000);
+
   return localDate.toISOString().slice(0, 16);
 };
 
@@ -20,16 +23,24 @@ const buildInitialFormData = (selectedOffer) => ({
   title: selectedOffer?.title || "",
   description: selectedOffer?.description || "",
   image: null,
-  existing_image_url: selectedOffer?.image_url || "",
+  image_url: selectedOffer?.image_url || "",
   redirect_url: selectedOffer?.redirect_url || "/coins",
   priority:
-    selectedOffer?.priority !== undefined && selectedOffer?.priority !== null
+    selectedOffer?.priority !== undefined
       ? Number(selectedOffer.priority)
       : "",
-  start_date: getDateTimeLocalValue(selectedOffer?.start_date),
-  end_date: getDateTimeLocalValue(selectedOffer?.end_date),
+  target_audience:
+    selectedOffer?.target_audience ||
+    selectedOffer?.gender ||
+    "ALL",
+  start_date: getDateTimeLocalValue(
+    selectedOffer?.start_date
+  ),
+  end_date: getDateTimeLocalValue(
+    selectedOffer?.end_date
+  ),
   status:
-    selectedOffer?.status !== undefined && selectedOffer?.status !== null
+    selectedOffer?.status !== undefined
       ? Number(selectedOffer.status)
       : 1,
 });
@@ -46,15 +57,23 @@ const OffersEditForm = ({ show, handleClose, selectedOffer }) => {
   const [localError, setLocalError] = useState("");
 
   useEffect(() => {
-    if (show && selectedOffer) {
-      const initialData = buildInitialFormData(selectedOffer);
-      setFormData(initialData);
-      setPreviewUrl(initialData.existing_image_url || "");
-      setLocalError("");
-      dispatch(resetUpdateOfferState());
-    }
-  }, [show, selectedOffer, dispatch]);
+  if (show && selectedOffer) {
+    const initialData = {
+      ...buildInitialFormData(selectedOffer),
 
+      existing_image_url:
+        selectedOffer?.image_url || "",
+    };
+
+    setFormData(initialData);
+
+    setPreviewUrl(selectedOffer?.image_url || "");
+
+    setLocalError("");
+
+    dispatch(resetUpdateOfferState());
+  }
+}, [show, selectedOffer, dispatch]);
   useEffect(() => {
     if (updateSuccess) {
       dispatch(offersFetchRequest());
@@ -105,10 +124,12 @@ const OffersEditForm = ({ show, handleClose, selectedOffer }) => {
     const localPreview = URL.createObjectURL(file);
 
     setLocalError("");
+
     setFormData((prev) => ({
       ...prev,
       image: file,
     }));
+
     setPreviewUrl(localPreview);
   };
 
@@ -133,26 +154,35 @@ const OffersEditForm = ({ show, handleClose, selectedOffer }) => {
     setLocalError("");
 
     const payload = new FormData();
+
     payload.append("title", formData.title.trim());
     payload.append("description", formData.description.trim());
     payload.append("redirect_url", formData.redirect_url || "/coins");
     payload.append("priority", String(Number(formData.priority)));
+    payload.append("target_audience", formData.target_audience || "ALL");
     payload.append("start_date", formData.start_date || "");
     payload.append("end_date", formData.end_date || "");
     payload.append("status", String(Number(formData.status)));
 
-    // always send current/old image url
     payload.append(
-      "existing_image_url",
-      formData.existing_image_url || selectedOffer?.image_url || ""
-    );
+  "existing_image_url",
+  formData.existing_image_url ||
+    selectedOffer?.image_url ||
+    ""
+);
 
-    // only send image if user selected a new one
-    if (formData.image) {
-      payload.append("image", formData.image);
-    }
+   if (formData.image) {
+  payload.append("image", formData.image);
+} else {
+  // send old image path when no new image selected
+  payload.append(
+    "image_url",
+    selectedOffer?.image_url || ""
+  );
+}
 
     console.log("selected id:", selectedOffer.id);
+
     for (const pair of payload.entries()) {
       console.log(pair[0], pair[1]);
     }
@@ -294,20 +324,36 @@ const OffersEditForm = ({ show, handleClose, selectedOffer }) => {
                   </span>
                 </div>
 
-                {previewUrl && (
-                  <img
-                    src={previewUrl}
-                    alt="preview"
-                    style={{
-                      marginTop: "14px",
-                      width: "140px",
-                      height: "100px",
-                      borderRadius: "10px",
-                      objectFit: "cover",
-                      border: "2px solid rgba(255,255,255,0.3)",
-                    }}
-                  />
-                )}
+{previewUrl && (
+  <>
+    <img
+      src={previewUrl}
+      alt="preview"
+      style={{
+        marginTop: "14px",
+        width: "140px",
+        height: "100px",
+        borderRadius: "10px",
+        objectFit: "cover",
+        border: "2px solid rgba(255,255,255,0.3)",
+      }}
+    />
+
+    <div
+      style={{
+        marginTop: "8px",
+        color: "#fff",
+        fontSize: "12px",
+        wordBreak: "break-all",
+      }}
+    >
+      <strong>Image Path:</strong>{" "}
+      {formData.existing_image_url ||
+        formData.image_url ||
+        "No image path"}
+    </div>
+  </>
+)}
               </div>
             </Col>
 
@@ -323,6 +369,24 @@ const OffersEditForm = ({ show, handleClose, selectedOffer }) => {
                   background: "#eee",
                 }}
               />
+            </Col>
+
+            <Col md={6}>
+              <Form.Label style={{ color: "#fff" }}>Target Audience</Form.Label>
+              <Form.Select
+                name="target_audience"
+                value={formData.target_audience}
+                onChange={handleChange}
+                style={{
+                  borderRadius: "12px",
+                  height: "50px",
+                  background: "#eee",
+                }}
+              >
+                <option value="ALL">All</option>
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+              </Form.Select>
             </Col>
 
             <Col md={6}>

@@ -22,6 +22,7 @@ const CoinsListPage = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedCoin, setSelectedCoin] = useState(null);
+  const [addFormKey, setAddFormKey] = useState(0);
 
   useEffect(() => {
     dispatch(coinsFetchRequest());
@@ -60,11 +61,18 @@ const CoinsListPage = () => {
   };
 
   const handleAddOpen = () => {
+    setAddFormKey((prev) => prev + 1);
     setShowAddModal(true);
   };
 
   const handleAddClose = () => {
     setShowAddModal(false);
+  };
+
+  const handleAddSuccess = () => {
+    setShowAddModal(false);
+    setAddFormKey((prev) => prev + 1);
+    dispatch(coinsFetchRequest());
   };
 
   const handleEditOpen = (row) => {
@@ -193,6 +201,7 @@ const CoinsListPage = () => {
           </div>
 
           <button
+            type="button"
             onClick={handleAddOpen}
             style={{
               border: "none",
@@ -226,7 +235,12 @@ const CoinsListPage = () => {
         </div>
       </div>
 
-      <CoinsAddForm show={showAddModal} onClose={handleAddClose} />
+      <CoinsAddForm
+        key={addFormKey}
+        show={showAddModal}
+        onClose={handleAddClose}
+        onSuccess={handleAddSuccess}
+      />
 
       <CoinsEditForm
         show={showEditModal}
