@@ -1,1 +1,1 @@
-export const LIFESTYLECATEGORY=`http://${process.env.REACT_APP_API_IPADDRES}:8082/api/lifestylecategory`
+export const LIFESTYLECATEGORY=`${process.env.REACT_APP_API_IPADDRES}/api/lifestylecategory`

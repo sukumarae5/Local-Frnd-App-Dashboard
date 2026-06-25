@@ -9,13 +9,13 @@ export default function BottomNavbar({
   const navigate = useNavigate();
 
   const menuItems = [
-    { key: "dashboard", icon: "bi-speedometer2", label: "Dashboard", path: "/" },
-    { key: "userlistpage", icon: "bi-people", label: "User List", path: "/userlistpage" },
-    { key: "photolistpage", icon: "bi-image", label: "Photo List", path: "/photolistpage" },
-    { key: "moderation", icon: "bi-gear", label: "Moderation", path: "/" },
-    { key: "review", icon: "bi-person-check", label: "Profile Review", path: "/" },
-    { key: "monetization", icon: "bi-cash-stack", label: "Monetization", path: "/" },
-    { key: "analytics", icon: "bi-bar-chart-line", label: "Analytics", path: "/" },
+    { key: "dashboard", icon: "bi-speedometer2", label: "Dashboard", path: "/dashboard" },
+    { key: "userlistpage", icon: "bi-people", label: "User List", path: "/dashboard/userlistpage" },
+    { key: "photolistpage", icon: "bi-image", label: "Photo List", path:"/dashboard/photolistpage" },
+    { key: "moderation", icon: "bi-gear", label: "Moderation", path: "/dashboard" },
+    { key: "review", icon: "bi-person-check", label: "Profile Review", path: "/dashboard" },
+    { key: "monetization", icon: "bi-cash-stack", label: "Monetization", path: "/dashboard" },
+    { key: "analytics", icon: "bi-bar-chart-line", label: "Analytics", path: "/dashboard" },
   ];
 
   return (

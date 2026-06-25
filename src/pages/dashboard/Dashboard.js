@@ -26,20 +26,41 @@ const Dashboard = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  useEffect(() => {
-    if (location.pathname === "/") {
-      setActiveMenu("dashboard");
-    } else if (location.pathname.startsWith("/userlistpage")) {
-      setActiveMenu("userlistpage");
-    } else if (location.pathname.startsWith("/photolistpage")) {
-      setActiveMenu("photolistpage");
-    } else if (location.pathname.startsWith("/languagepage")) {
-      setActiveMenu("languagepage");
-    
-    } else if (location.pathname.startsWith("/Coinspage")) {
-      setActiveMenu("Coinspage");
-    }
-  }, [location.pathname]);
+ useEffect(() => {
+  if (location.pathname === "/dashboard") {
+    setActiveMenu("dashboard");
+  } else if (
+    location.pathname.startsWith(
+      "/dashboard/userlistpage"
+    )
+  ) {
+    setActiveMenu("userlistpage");
+  } else if (
+    location.pathname.startsWith(
+      "/dashboard/photolistpage"
+    )
+  ) {
+    setActiveMenu("photolistpage");
+  } else if (
+    location.pathname.startsWith(
+      "/dashboard/languagepage"
+    )
+  ) {
+    setActiveMenu("languagepage");
+  } else if (
+    location.pathname.startsWith(
+      "/dashboard/interestpage"
+    )
+  ) {
+    setActiveMenu("interestpage");
+  } else if (
+    location.pathname.startsWith(
+      "/dashboard/lifestylepage"
+    )
+  ) {
+    setActiveMenu("lifestylepage");
+  }
+}, [location.pathname]);
 
   return (
     <Container
