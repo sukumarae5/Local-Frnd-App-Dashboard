@@ -28,17 +28,19 @@ const OffersAddForm = ({ show, handleClose }) => {
   const [formData, setFormData] = useState(initialFormData);
   const [previewUrl, setPreviewUrl] = useState("");
 
-  useEffect(() => {
-    if (show) {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
+ useEffect(() => {
+  if (show) {
+    setPreviewUrl((oldPreviewUrl) => {
+      if (oldPreviewUrl) {
+        URL.revokeObjectURL(oldPreviewUrl);
       }
+      return "";
+    });
 
-      setFormData(initialFormData);
-      setPreviewUrl("");
-      dispatch(resetAddOfferState());
-    }
-  }, [show, dispatch]);
+    setFormData(initialFormData);
+    dispatch(resetAddOfferState());
+  }
+}, [show, dispatch]);
 
   useEffect(() => {
     if (addSuccess) {

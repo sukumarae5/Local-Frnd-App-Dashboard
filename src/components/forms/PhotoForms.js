@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import { useDispatch } from "react-redux";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation,  } from "react-router-dom";
 import { EditPhotosRequest } from "../../features/photos/photosAction";
 
 const nowString = () =>
@@ -34,7 +34,6 @@ const buildFormFromPhoto = (p) => {
 const PhotoForms = ({ initialPhoto = null, onClose }) => {
   const fileRef = useRef(null);
   const location = useLocation();
-  const params = useParams();
   const dispatch = useDispatch();
   const [submitting, setSubmitting] = useState(false);
 

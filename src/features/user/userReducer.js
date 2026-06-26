@@ -21,15 +21,7 @@ const initialState = {
 
 const getId = (u) => u?.user_id ?? u?.id;
 
-const updateArrayById = (arr, updated) => {
-  const uid = getId(updated);
-  if (uid == null) return arr;
-  const idx = arr.findIndex((x) => getId(x) === uid);
-  if (idx === -1) return arr;
-  const next = arr.slice();
-  next[idx] = { ...arr[idx], ...updated };
-  return next;
-};
+
 
 const userReducer = (state = initialState, action) => {
   switch (action.type) {
@@ -65,13 +57,14 @@ const userReducer = (state = initialState, action) => {
 
 case EDIT_USER_SUCCESS: {
   const updated = action.payload;
+
   return {
     ...state,
     loading: false,
-    user: updated,
+    user: (state.user, updated),
     error: "",
     success: true,
-    message: action.payload?.message || "Profile updated",
+    message: "Profile updated",
   };
 }
 

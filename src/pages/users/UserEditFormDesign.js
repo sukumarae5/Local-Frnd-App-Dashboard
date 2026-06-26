@@ -33,7 +33,7 @@ const UserEditFormDesign = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { loading, user, error, success, message } = useSelector(
+  const { error, success, message } = useSelector(
     (s) => s.user || {}
   );
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   coinsFetchRequest,
@@ -28,20 +28,20 @@ const CoinsListPage = () => {
     dispatch(coinsFetchRequest());
   }, [dispatch]);
 
-  const coinsList = Array.isArray(coins)
-    ? coins
-    : Array.isArray(coins?.data)
-    ? coins.data
-    : [];
+  const coinsList = useMemo(() => {
+    if (Array.isArray(coins)) return coins;
+    if (Array.isArray(coins?.data)) return coins.data;
+    return [];
+  }, [coins]);
 
-  const formatDate = (value) => {
+  const formatDate = useCallback((value) => {
     if (!value) return "N/A";
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return "N/A";
     return date.toLocaleDateString();
-  };
+  }, []);
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = useCallback((status) => {
     const isActive = Number(status) === 1;
 
     return (
@@ -58,7 +58,7 @@ const CoinsListPage = () => {
         {isActive ? "Active" : "Inactive"}
       </span>
     );
-  };
+  }, []);
 
   const handleAddOpen = () => {
     setAddFormKey((prev) => prev + 1);
@@ -75,83 +75,94 @@ const CoinsListPage = () => {
     dispatch(coinsFetchRequest());
   };
 
-  const handleEditOpen = (row) => {
+  const handleEditOpen = useCallback((row) => {
     setSelectedCoin(row);
     setShowEditModal(true);
-  };
+  }, []);
 
-  const handleEditClose = () => {
+  const handleEditClose = useCallback(() => {
     setShowEditModal(false);
     setSelectedCoin(null);
-  };
+    dispatch(coinsFetchRequest());
+  }, [dispatch]);
 
-  const handleDelete = (row) => {
-    if (!row?.id) return;
+  const handleDelete = useCallback(
+    (row) => {
+      if (!row?.id) return;
 
-    const isConfirmed = window.confirm(
-      `Are you sure you want to delete coin package ID ${row.id}?`
-    );
+      const isConfirmed = window.confirm(
+        `Are you sure you want to delete coin package ID ${row.id}?`
+      );
 
-    if (isConfirmed) {
-      dispatch(deleteCoinsRequest(row.id));
-    }
-  };
+      if (isConfirmed) {
+        dispatch(deleteCoinsRequest(row.id));
+      }
+    },
+    [dispatch]
+  );
 
-  const columns = [
-    {
-      key: "id",
-      label: "ID",
-      render: (row) => row?.id ?? "N/A",
-    },
-    {
-      key: "coins",
-      label: "Coins",
-      render: (row) => row?.coins ?? 0,
-    },
-    {
-      key: "minutes",
-      label: "Minutes",
-      render: (row) => row?.minutes ?? 0,
-    },
-    {
-      key: "original_price",
-      label: "Original Price",
-      render: (row) => `₹${row?.original_price ?? 0}`,
-    },
-    {
-      key: "discount_percent",
-      label: "Discount %",
-      render: (row) => `${row?.discount_percent ?? 0}%`,
-    },
-    {
-      key: "price_after_discount",
-      label: "Final Price",
-      render: (row) => `₹${row?.price_after_discount ?? 0}`,
-    },
-    {
-      key: "status",
-      label: "Status",
-      render: (row) => getStatusBadge(row?.status),
-    },
-    {
-      key: "created_at",
-      label: "Created At",
-      render: (row) => formatDate(row?.created_at),
-    },
-    {
-      key: "actions",
-      label: "Actions",
-      render: (row) => (
-        <AppButtonRow
-          onEdit={() => handleEditOpen(row)}
-          onDelete={() => handleDelete(row)}
-        />
-      ),
-    },
-  ];
+  const columns = useMemo(
+    () => [
+      {
+        key: "id",
+        label: "ID",
+        render: (row) => row?.id ?? "N/A",
+      },
+      {
+        key: "coins",
+        label: "Coins",
+        render: (row) => row?.coins ?? 0,
+      },
+      {
+        key: "minutes",
+        label: "Minutes",
+        render: (row) => row?.minutes ?? 0,
+      },
+      {
+        key: "original_price",
+        label: "Original Price",
+        render: (row) => `₹${row?.original_price ?? 0}`,
+      },
+      {
+        key: "discount_percent",
+        label: "Discount %",
+        render: (row) => `${row?.discount_percent ?? 0}%`,
+      },
+      {
+        key: "price_after_discount",
+        label: "Final Price",
+        render: (row) => `₹${row?.price_after_discount ?? 0}`,
+      },
+      {
+        key: "status",
+        label: "Status",
+        render: (row) => getStatusBadge(row?.status),
+      },
+      {
+        key: "created_at",
+        label: "Created At",
+        render: (row) => formatDate(row?.created_at),
+      },
+      {
+        key: "actions",
+        label: "Actions",
+        render: (row) => (
+          <AppButtonRow
+            onEdit={() => handleEditOpen(row)}
+            onDelete={() => handleDelete(row)}
+          />
+        ),
+      },
+    ],
+    [formatDate, getStatusBadge, handleEditOpen, handleDelete]
+  );
 
   if (loading) {
-    return <div style={{ padding: "20px", color: "#fff" }}>Loading coins...</div>;
+    return (
+      <div style={{ padding: "20px", color: "#fff" }}>
+        Loading coins...
+      </div>
+    );
   }
 
   if (error) {
@@ -191,12 +202,7 @@ const CoinsListPage = () => {
             flexWrap: "wrap",
           }}
         >
-          <div
-            style={{
-              fontSize: "20px",
-              fontWeight: "600",
-            }}
-          >
+          <div style={{ fontSize: "20px", fontWeight: "600" }}>
             Coin Packages
           </div>
 
@@ -220,11 +226,11 @@ const CoinsListPage = () => {
           </button>
         </div>
 
-        {deleteLoading ? (
+        {deleteLoading && (
           <div style={{ padding: "14px 16px", color: "#fff" }}>
             Deleting coin package...
           </div>
-        ) : null}
+        )}
 
         <div style={{ padding: "16px" }}>
           <AppTable
