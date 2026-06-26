@@ -17,9 +17,7 @@ const UserListPage = () => {
   const [filterOpen, setFilterOpen] = useState(false);
 
   const [formOpen, setFormOpen] = useState(false);
-  const [formMode, setFormMode] = useState("edit");
-  const [formInitialValues, setFormInitialValues] = useState({});
-
+ 
   const [selectedUser, setSelectedUser] = useState(null);
   const [viewOpen, setViewOpen] = useState(false);
 
@@ -137,29 +135,10 @@ const UserListPage = () => {
   }, [formOpen, viewOpen, callHistoryOpen]);
 
   /* ================= EDIT ================= */
-  const toInitialValues = (r) => ({
-    id: r.user_id,
-    name: r.name ?? "",
-    username: r.username ?? "",
-    mobile: r.mobile_number ?? "",
-    email: r.email ?? "",
-    age: r.age ?? "",
-    gender: r.gender ?? "",
-    profileStatus: r.profile_status ?? "",
-    status: r.status ?? "",
-    coins: r.coin_balance ?? "",
-    lat: r.location_lat ?? "",
-    lon: r.location_log ?? "",
-    dob: r.date_of_birth ?? "",
-    bio: r.bio ?? "",
-    otp: r.otp ?? "",
-    createdAt: r.created_at ?? "",
-    updatedAt: r.updated_at ?? r.updates_at ?? "",
-  });
+ 
 
   const openEdit = (row) => {
-    setFormMode("edit");
-    setFormInitialValues(toInitialValues(row));
+   ;
     setFormOpen(true);
 
     if (!location.pathname.endsWith("/edit")) {
@@ -209,7 +188,7 @@ const UserListPage = () => {
     return date.toLocaleString();
   };
 
-  const actionBtnStyle = {
+  const actionBtnStyle = useMemo(() => ({
     width: "34px",
     height: "34px",
     display: "inline-flex",
@@ -217,8 +196,7 @@ const UserListPage = () => {
     justifyContent: "center",
     padding: 0,
     flex: "0 0 auto",
-  };
-
+  }),[]);
   /* ================= TABLE ================= */
   const columns = useMemo(
     () => [
@@ -359,7 +337,7 @@ const UserListPage = () => {
         render: (r) => formatDateTime(r.ended_at ?? r.end_time ?? r.updated_at),
       },
     ],
-    []
+    [actionBtnStyle, handleCallHistory, handleDelete, openEdit]
   );
 
   /* ================= STYLES ================= */

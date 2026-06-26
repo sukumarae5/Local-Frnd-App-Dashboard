@@ -116,7 +116,7 @@ const PhotoListPage = () => {
           return (
             <img
               src={src || FALLBACK_IMG}
-              alt={`Photo ${row.photo_id}`}
+              alt={`ID ${row.photo_id}`}
               onError={(e) => (e.currentTarget.src = FALLBACK_IMG)}
               style={{
                 width: 55,

@@ -26,12 +26,14 @@ const Dashboardmain = () => {
     dispatch(callsFetchRequest());
   }, [dispatch]);
 
-  const users = Array.isArray(user) ? user : [];
-  const callsList = Array.isArray(calls)
-    ? calls
-    : Array.isArray(calls?.data)
-    ? calls.data
-    : [];
+ const users = useMemo(() => {
+  return Array.isArray(user) ? user : [];
+}, [user]);
+ const callsList = useMemo(() => {
+  if (Array.isArray(calls)) return calls;
+  if (Array.isArray(calls?.data)) return calls.data;
+  return [];
+}, [calls]);
 
   const totalUsers = users.length;
 

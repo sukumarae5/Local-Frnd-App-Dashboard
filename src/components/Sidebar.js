@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate,} from "react-router-dom";
 import img1 from "../assets/logo1lf.png";
 
 export default function Sidebar({
@@ -9,7 +9,7 @@ export default function Sidebar({
   setActiveMenu,
 }) {
   const navigate = useNavigate();
-  const location = useLocation();
+  
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 992);
 
