@@ -218,4 +218,4 @@ const CoinsEditForm = ({ show, onClose, selectedCoin }) => {
   );
 };
 
-export default CoinsEditForm;
+export default CoinsEditForm

@@ -198,148 +198,108 @@ const UserListPage = () => {
     flex: "0 0 auto",
   }),[]);
   /* ================= TABLE ================= */
-  const columns = useMemo(
-    () => [
-      { key: "user_id", label: "ID" },
-      { key: "name", label: "Name" },
-      { key: "username", label: "Username", render: (r) => r.username ?? "-" },
-      { key: "age", label: "Age", render: (r) => r.age ?? "-" },
-      { key: "gender", label: "Gender", render: (r) => r.gender ?? "-" },
-      { key: "email", label: "Email", render: (r) => r.email ?? "-" },
-      {
-        key: "mobile_number",
-        label: "Phone",
-        render: (r) => r.mobile_number ?? "-",
-      },
-      { key: "status", label: "Status", render: (r) => r.status ?? "-" },
-      {
-        key: "profile_status",
-        label: "Profile",
-        render: (r) => r.profile_status ?? "-",
-      },
-      {
-        key: "location",
-        label: "Location (lat, lon)",
-        render: (r) => `${r.location_lat ?? "-"}, ${r.location_log ?? "-"}`,
-      },
-      {
-        key: "coin_balance",
-        label: "Coins",
-        render: (r) => r.coin_balance ?? "-",
-      },
-      {
-        key: "actions",
-        label: "Actions",
-        render: (row) => (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px",
-              flexWrap: "nowrap",
-              whiteSpace: "nowrap",
-              overflowX: "auto",
-            }}
-          >
-            <button
-              type="button"
-              title="View"
-              onClick={() => handleView(row)}
-              className="btn btn-sm btn-info text-white"
-              style={actionBtnStyle}
-            >
-              <i className="bi bi-eye-fill"></i>
-            </button>
+ const columns = [
+  { key: "user_id", label: "ID" },
+  { key: "name", label: "Name" },
+  { key: "username", label: "Username", render: (r) => r.username ?? "-" },
+  { key: "age", label: "Age", render: (r) => r.age ?? "-" },
+  { key: "gender", label: "Gender", render: (r) => r.gender ?? "-" },
+  { key: "email", label: "Email", render: (r) => r.email ?? "-" },
+  {
+    key: "mobile_number",
+    label: "Phone",
+    render: (r) => r.mobile_number ?? "-",
+  },
+  { key: "status", label: "Status", render: (r) => r.status ?? "-" },
+  {
+    key: "profile_status",
+    label: "Profile",
+    render: (r) => r.profile_status ?? "-",
+  },
+  {
+    key: "location",
+    label: "Location (lat, lon)",
+    render: (r) => `${r.location_lat ?? "-"}, ${r.location_log ?? "-"}`,
+  },
+  {
+    key: "coin_balance",
+    label: "Coins",
+    render: (r) => r.coin_balance ?? "-",
+  },
+  {
+    key: "actions",
+    label: "Actions",
+    render: (row) => (
+      <div style={{ display: "flex", gap: "6px", justifyContent: "center" }}>
+        <button onClick={() => handleView(row)} className="btn btn-sm btn-info text-white" style={actionBtnStyle}>
+          <i className="bi bi-eye-fill"></i>
+        </button>
 
-            <button
-              type="button"
-              title="Edit"
-              onClick={() => openEdit(row)}
-              className="btn btn-sm btn-warning text-dark"
-              style={actionBtnStyle}
-            >
-              <i className="bi bi-pencil-square"></i>
-            </button>
+        <button onClick={() => openEdit(row)} className="btn btn-sm btn-warning text-dark" style={actionBtnStyle}>
+          <i className="bi bi-pencil-square"></i>
+        </button>
 
-            <button
-              type="button"
-              title="Call History"
-              onClick={() => handleCallHistory(row)}
-              className="btn btn-sm btn-primary"
-              style={actionBtnStyle}
-            >
-              <i className="bi bi-clock-history"></i>
-            </button>
+        <button onClick={() => handleCallHistory(row)} className="btn btn-sm btn-primary" style={actionBtnStyle}>
+          <i className="bi bi-clock-history"></i>
+        </button>
 
-            <button
-              type="button"
-              title="Delete"
-              onClick={() => handleDelete(row)}
-              className="btn btn-sm btn-danger"
-              style={actionBtnStyle}
-            >
-              <i className="bi bi-trash-fill"></i>
-            </button>
-          </div>
-        ),
-      },
-    ],
-    []
-  );
+        <button onClick={() => handleDelete(row)} className="btn btn-sm btn-danger" style={actionBtnStyle}>
+          <i className="bi bi-trash-fill"></i>
+        </button>
+      </div>
+    ),
+  },
+];
 
   const pagedUsers = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredUsers.slice(start, start + itemsPerPage);
   }, [filteredUsers, currentPage]);
 
-  const callHistoryColumns = useMemo(
-    () => [
-      {
-        key: "id",
-        label: "ID",
-        render: (r) => r.id ?? r.call_id ?? "-",
-      },
-      {
-        key: "caller_id",
-        label: "Caller ID",
-        render: (r) => r.caller_id ?? r.callerId ?? r.from_user ?? "-",
-      },
-      {
-        key: "receiver_id",
-        label: "Receiver ID",
-        render: (r) => r.receiver_id ?? r.receiverId ?? r.to_user ?? "-",
-      },
-      {
-        key: "call_type",
-        label: "Call Type",
-        render: (r) => r.call_type ?? r.type ?? "-",
-      },
-      {
-        key: "status",
-        label: "Status",
-        render: (r) => r.status ?? "-",
-      },
-      {
-        key: "duration",
-        label: "Duration",
-        render: (r) => r.duration ?? r.call_duration ?? "-",
-      },
-      {
-        key: "started_at",
-        label: "Started At",
-        render: (r) =>
-          formatDateTime(r.started_at ?? r.start_time ?? r.created_at),
-      },
-      {
-        key: "ended_at",
-        label: "Ended At",
-        render: (r) => formatDateTime(r.ended_at ?? r.end_time ?? r.updated_at),
-      },
-    ],
-    [actionBtnStyle, handleCallHistory, handleDelete, openEdit]
-  );
-
+ const callHistoryColumns = [
+  {
+    key: "id",
+    label: "ID",
+    render: (r) => r.id ?? r.call_id ?? "-",
+  },
+  {
+    key: "caller_id",
+    label: "Caller ID",
+    render: (r) => r.caller_id ?? r.callerId ?? r.from_user ?? "-",
+  },
+  {
+    key: "receiver_id",
+    label: "Receiver ID",
+    render: (r) => r.receiver_id ?? r.receiverId ?? r.to_user ?? "-",
+  },
+  {
+    key: "call_type",
+    label: "Call Type",
+    render: (r) => r.call_type ?? r.type ?? "-",
+  },
+  {
+    key: "status",
+    label: "Status",
+    render: (r) => r.status ?? "-",
+  },
+  {
+    key: "duration",
+    label: "Duration",
+    render: (r) => r.duration ?? r.call_duration ?? "-",
+  },
+  {
+    key: "started_at",
+    label: "Started At",
+    render: (r) =>
+      formatDateTime(r.started_at ?? r.start_time ?? r.created_at),
+  },
+  {
+    key: "ended_at",
+    label: "Ended At",
+    render: (r) =>
+      formatDateTime(r.ended_at ?? r.end_time ?? r.updated_at),
+  },
+];
   /* ================= STYLES ================= */
   const containerStyles = {
     background: "rgba(47, 53, 69, 0.79)",
