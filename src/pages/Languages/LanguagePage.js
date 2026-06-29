@@ -20,13 +20,13 @@ const LanguagePage = () => {
 
   // ✅ go to Add page
   const openAddPage = () => {
-    navigate("/languagepage/add");
+    navigate("/dashboard/languagepage/add");
   };
 
   // ✅ go to Edit page (PASS ROW DATA)
   const openEditPage = useCallback(
     (row) => {
-      navigate(`/languagepage/edit/${row.id}`, { state: { row } });
+      navigate(`/dashboard/languagepage/edit/${row.id}`, { state: { row } });
     },
     [navigate]
   );

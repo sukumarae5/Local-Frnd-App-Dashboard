@@ -31,7 +31,7 @@ const LanguageAddForm = () => {
   // ✅ Cancel / Close → back to LanguagePage (NO 404)
   const closeModal = () => {
     setShowAddModal(false);
-    navigate("/languagepage"); // ✅ correct route based on your AppRouter
+    navigate("/dashboard/languagepage"); // ✅ correct route based on your AppRouter
   };
 
   const handleChange = (e) => {

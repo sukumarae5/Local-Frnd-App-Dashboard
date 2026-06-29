@@ -1,287 +1,375 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Button } from "react-bootstrap";
-import AppTable from "../../components/tables/AppTable";
-import { AppButtonRow } from "../../components/button/AppButton";
 import {
-  offersFetchRequest,
+  Table,
+  Card,
+  Row,
+  Col,
+  Form,
+  Button,
+  Badge,
+  Spinner,
+} from "react-bootstrap";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
+import {
+  fetchOffersRequest,
   deleteOfferRequest,
 } from "../../features/Offers/OffersActions";
-import OffersAddForm from "./OffersAddForm";
-import OffersEditForm from "./OffersEditForm";
 
-const OffersListPage = () => {
+const OfferListPage = () => {
   const dispatch = useDispatch();
-
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedOffer, setSelectedOffer] = useState(null);
+  const navigate = useNavigate();
 
   const {
-    loading = false,
     offers = [],
-    error = "",
-    deleteLoading = false,
-  } = useSelector((state) => state.offers || {});
+    loading = false,
+    deleting = false,
+    deleteSuccess = false,
+  } = useSelector((state) => state.offers);
+
+  const [search, setSearch] = useState("");
+  const [bannerType, setBannerType] = useState("ALL");
+  const [audience, setAudience] = useState("ALL");
 
   useEffect(() => {
-    dispatch(offersFetchRequest());
+    dispatch(fetchOffersRequest());
   }, [dispatch]);
 
-  const formatDate = (value) => {
-    if (!value) return "N/A";
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "N/A";
-    return date.toLocaleDateString("en-GB");
-  };
+  /*
+   * Refresh the offers list after deleting an offer.
+   */
+  useEffect(() => {
+    if (deleteSuccess) {
+      dispatch(fetchOffersRequest());
+    }
+  }, [deleteSuccess, dispatch]);
 
-  const formatTargetAudience = (row) => {
-    const value = row?.target_audience || row?.gender || "-";
+  const filteredOffers = useMemo(() => {
+    const searchValue = search.trim().toLowerCase();
 
-    if (value === "ALL" || value === "All" || value === "all") return "All";
-    if (value === "MALE" || value === "Male" || value === "male") return "Male";
-    if (value === "FEMALE" || value === "Female" || value === "female")
-      return "Female";
+    return offers.filter((offer) => {
+      const currentBannerType = String(
+        offer?.banner_type || ""
+      ).toUpperCase();
 
-    return value;
-  };
+      const currentAudience = String(
+        offer?.target_audience || ""
+      ).toUpperCase();
 
-  const sortedOffers = useMemo(() => {
-    return [...offers].sort(
-      (a, b) => (a?.priority ?? 999) - (b?.priority ?? 999)
-    );
-  }, [offers]);
+      const matchesSearch =
+        currentBannerType.toLowerCase().includes(searchValue) ||
+        String(offer?.title || "")
+          .toLowerCase()
+          .includes(searchValue) ||
+        String(offer?.id || "").includes(searchValue);
 
-  const handleAddOffer = () => {
-    setShowAddModal(true);
-  };
+      const matchesType =
+        bannerType === "ALL" ||
+        currentBannerType === bannerType;
 
-  const handleCloseAddModal = () => {
-    setShowAddModal(false);
-  };
+      const matchesAudience =
+        audience === "ALL" ||
+        currentAudience === audience;
 
-  const handleEdit = (row) => {
-    setSelectedOffer(row);
-    setShowEditModal(true);
-  };
+      return matchesSearch && matchesType && matchesAudience;
+    });
+  }, [offers, search, bannerType, audience]);
 
-  const handleCloseEditModal = () => {
-    setShowEditModal(false);
-    setSelectedOffer(null);
-  };
-
-  const handleDelete = (row) => {
-    if (!row?.id) return;
-
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete offer ID ${row.id}?`
+  const handleDelete = (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this offer?"
     );
 
-    if (!confirmDelete) return;
+    if (!confirmed) {
+      return;
+    }
 
-    dispatch(deleteOfferRequest(row.id));
+    dispatch(deleteOfferRequest(id));
   };
 
-  const columns = [
-    {
-      key: "id",
-      label: "ID",
-      render: (row) => row?.id ?? "-",
-    },
-    {
-      key: "image_url",
-      label: "Image",
-      render: (row) =>
-        row?.image_url ? (
-          <img
-            src={row.image_url}
-            alt={row?.title || "offer"}
-            style={{
-              width: "70px",
-              height: "48px",
-              objectFit: "cover",
-              borderRadius: "8px",
-              border: "1px solid rgba(255,255,255,0.25)",
-            }}
-          />
-        ) : (
-          "-"
-        ),
-    },
-    {
-      key: "title",
-      label: "Title",
-      render: (row) => row?.title || "-",
-    },
-    {
-      key: "description",
-      label: "Description",
-      render: (row) => row?.description || "-",
-    },
-    {
-      key: "priority",
-      label: "Priority",
-      render: (row) => row?.priority ?? "-",
-    },
-    {
-      key: "target_audience",
-      label: "Target Audience",
-      render: (row) => formatTargetAudience(row),
-    },
-    {
-      key: "start_date",
-      label: "Start Date",
-      render: (row) => formatDate(row?.start_date),
-    },
-    {
-      key: "end_date",
-      label: "End Date",
-      render: (row) => formatDate(row?.end_date),
-    },
-    {
-      key: "status",
-      label: "Status",
-      render: (row) => (
-        <span
-          style={{
-            display: "inline-block",
-            padding: "8px 18px",
-            borderRadius: "999px",
-            fontWeight: 700,
-            fontSize: "14px",
-            background:
-              row?.status === 1
-                ? "linear-gradient(135deg, #6D5BFF, #7C4DFF)"
-                : "linear-gradient(135deg, #ef4444, #dc2626)",
-            color: "#fff",
-            minWidth: "82px",
-            textAlign: "center",
-          }}
-        >
-          {row?.status === 1 ? "Active" : "Inactive"}
-        </span>
-      ),
-    },
-    {
-      key: "created_at",
-      label: "Created At",
-      render: (row) => formatDate(row?.created_at),
-    },
-    {
-      key: "actions",
-      label: "Actions",
-      render: (row) => (
-        <AppButtonRow
-          onEdit={() => handleEdit(row)}
-          onDelete={() => handleDelete(row)}
-        />
-      ),
-    },
-  ];
+  const getStatusBadge = (status) => {
+    return Number(status) === 1 ? (
+      <Badge bg="success">Active</Badge>
+    ) : (
+      <Badge bg="danger">Inactive</Badge>
+    );
+  };
+
+  /*
+   * The backend may return image_url or background_image.
+   * This helper supports both.
+   */
+  const getOfferImage = (offer) => {
+    const imagePath =
+      offer?.image_url ||
+      offer?.background_image ||
+      offer?.image ||
+      "";
+
+    if (!imagePath) {
+      return "";
+    }
+
+    /*
+     * Cloudinary, S3, or any full URL.
+     */
+    if (
+      imagePath.startsWith("http://") ||
+      imagePath.startsWith("https://") ||
+      imagePath.startsWith("data:image")
+    ) {
+      return imagePath;
+    }
+
+    /*
+     * Use your API base URL when the backend returns a relative path.
+     *
+     * Example:
+     * REACT_APP_API_IP=http://localhost:5000
+     */
+    const apiBaseUrl = (
+      process.env.REACT_APP_API_IP || ""
+    ).replace(/\/$/, "");
+
+    const cleanImagePath = imagePath.replace(/^\//, "");
+
+    return apiBaseUrl
+      ? `${apiBaseUrl}/${cleanImagePath}`
+      : `/${cleanImagePath}`;
+  };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#05070b",
-        padding: "28px 20px",
-      }}
-    >
-      <div
-        style={{
-          background: "linear-gradient(180deg, #1a2134 0%, #1b1f2e 100%)",
-          borderRadius: "24px",
-          overflow: "hidden",
-          boxShadow: "0 16px 40px rgba(0,0,0,0.45)",
-          border: "1px solid rgba(255,255,255,0.06)",
-        }}
-      >
-        <div
-          className="d-flex justify-content-between align-items-center"
-          style={{
-            padding: "24px 28px",
-            borderBottom: "1px solid rgba(255,255,255,0.10)",
-            flexWrap: "wrap",
-            gap: "16px",
-          }}
-        >
-          <h2
-            style={{
-              color: "#fff",
-              margin: 0,
-              fontWeight: 400,
-              fontSize: "20px",
-            }}
-          >
-            Offers
-          </h2>
+    <Card className="shadow">
+      <Card.Header>
+        <Row className="g-2 align-items-center">
+          <Col md={3}>
+            <h4 className="mb-0">Offers</h4>
+          </Col>
 
-          <Button
-            onClick={handleAddOffer}
-            style={{
-              background: "linear-gradient(135deg, #A855F7, #6D5BFF)",
-              border: "none",
-              borderRadius: "16px",
-              padding: "16px 28px",
-              fontSize: "18px",
-              fontWeight: "700",
-              color: "#fff",
-              boxShadow: "0 8px 24px rgba(139, 92, 246, 0.45)",
-            }}
-          >
-            + Add Offer
-          </Button>
-        </div>
+          <Col md={3}>
+            <Form.Control
+              type="text"
+              placeholder="Search by ID, title or banner..."
+              value={search}
+              onChange={(event) =>
+                setSearch(event.target.value)
+              }
+            />
+          </Col>
 
-        <div style={{ padding: "26px 24px 10px 24px" }}>
-          {loading && (
-            <div style={{ color: "#fff", padding: "16px", fontWeight: 600 }}>
-              Loading offers...
-            </div>
-          )}
-
-          {deleteLoading && (
-            <div
-              style={{
-                color: "#fff",
-                padding: "0 16px 16px",
-                fontWeight: 600,
-              }}
+          <Col md={2}>
+            <Form.Select
+              value={bannerType}
+              onChange={(event) =>
+                setBannerType(event.target.value)
+              }
             >
-              Deleting offer...
-            </div>
-          )}
+              <option value="ALL">All Types</option>
+              <option value="COIN">Coin</option>
+              <option value="PRIVACY">Privacy</option>
+              <option value="RJ">RJ</option>
+              <option value="TRIAL">Trial</option>
+              <option value="REWARD">Reward</option>
+            </Form.Select>
+          </Col>
 
-          {error && (
-            <div
-              style={{
-                color: "#fff",
-                background: "rgba(239,68,68,0.18)",
-                border: "1px solid rgba(239,68,68,0.35)",
-                padding: "14px 16px",
-                borderRadius: "12px",
-                marginBottom: "16px",
-              }}
+          <Col md={2}>
+            <Form.Select
+              value={audience}
+              onChange={(event) =>
+                setAudience(event.target.value)
+              }
             >
-              {error}
-            </div>
-          )}
+              <option value="ALL">All Audience</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+            </Form.Select>
+          </Col>
 
-          {!loading && !error && (
-            <AppTable columns={columns} data={sortedOffers} />
-          )}
-        </div>
-      </div>
+          <Col md={2} className="text-end">
+            <Button
+              variant="primary"
+              onClick={() =>
+                navigate(
+                  "/dashboard/offerspage/create"
+                )
+              }
+            >
+              + Add Offer
+            </Button>
+          </Col>
+        </Row>
+      </Card.Header>
 
-      <OffersAddForm show={showAddModal} handleClose={handleCloseAddModal} />
+      <Card.Body>
+        {loading ? (
+          <div className="text-center p-5">
+            <Spinner animation="border" />
+          </div>
+        ) : (
+          <Table hover responsive bordered>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Preview</th>
+                <th>Title</th>
+                <th>Banner</th>
+                <th>Audience</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
 
-      <OffersEditForm
-        show={showEditModal}
-        handleClose={handleCloseEditModal}
-        selectedOffer={selectedOffer}
-      />
-    </div>
+            <tbody>
+              {filteredOffers.length > 0 ? (
+                filteredOffers.map((offer) => {
+                  const imageUrl =
+                    getOfferImage(offer);
+
+                  return (
+                    <tr key={offer.id}>
+                      <td>{offer.id}</td>
+
+                      <td>
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={
+                              offer.title ||
+                              "Offer preview"
+                            }
+                            style={{
+                              width: "120px",
+                              height: "60px",
+                              objectFit: "cover",
+                              borderRadius: "8px",
+                              border:
+                                "1px solid #dee2e6",
+                            }}
+                            onError={(event) => {
+                              console.error(
+                                "Image failed to load:",
+                                imageUrl
+                              );
+
+                              event.currentTarget.style.display =
+                                "none";
+
+                              const fallback =
+                                event.currentTarget
+                                  .nextElementSibling;
+
+                              if (fallback) {
+                                fallback.style.display =
+                                  "inline";
+                              }
+                            }}
+                          />
+                        ) : null}
+
+                        <span
+                          style={{
+                            display: imageUrl
+                              ? "none"
+                              : "inline",
+                          }}
+                        >
+                          No image
+                        </span>
+                      </td>
+
+                      <td>{offer.title || "-"}</td>
+
+                      <td>
+                        <Badge bg="primary">
+                          {offer.banner_type || "-"}
+                        </Badge>
+                      </td>
+
+                      <td>
+                        {offer.target_audience || "-"}
+                      </td>
+
+                      <td>{offer.priority ?? "-"}</td>
+
+                      <td>
+                        {getStatusBadge(offer.status)}
+                      </td>
+
+                      <td>
+                        {offer.start_date
+                          ? offer.start_date.substring(
+                              0,
+                              10
+                            )
+                          : "-"}
+                      </td>
+
+                      <td>
+                        {offer.end_date
+                          ? offer.end_date.substring(
+                              0,
+                              10
+                            )
+                          : "-"}
+                      </td>
+
+                      <td>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                          }}
+                        >
+                          <Button
+                            size="sm"
+                            variant="warning"
+                            onClick={() =>
+                              navigate(
+                                `/dashboard/offerspage/edit/${offer.id}`
+                              )
+                            }
+                          >
+                            Edit
+                          </Button>
+
+                          <Button
+                            size="sm"
+                            variant="danger"
+                            disabled={deleting}
+                            onClick={() =>
+                              handleDelete(offer.id)
+                            }
+                          >
+                            {deleting
+                              ? "Deleting..."
+                              : "Delete"}
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td
+                    colSpan={10}
+                    className="text-center py-4"
+                  >
+                    No offers found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        )}
+      </Card.Body>
+    </Card>
   );
 };
 
-export default OffersListPage;
+export default OfferListPage;

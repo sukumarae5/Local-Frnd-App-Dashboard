@@ -1,185 +1,384 @@
-// features/Offers/OffersSaga.js
-
 import { call, put, takeLatest } from "redux-saga/effects";
 import axios from "axios";
+
 import { OFFERS } from "../../api/OffersApi";
 
-import {
-  FETCH_OFFERS_REQUEST,
-  ADD_OFFER_REQUEST,
-  UPDATE_OFFER_REQUEST,
-  DELETE_OFFER_REQUEST,
-} from "./OffersType";
+import * as types from "./OffersType";
 
 import {
-  offersFetchSuccess,
-  offersFetchFailure,
+  fetchOffersSuccess,
+  fetchOffersFailure,
+
+  fetchOfferSuccess,
+  fetchOfferFailure,
+
   addOfferSuccess,
   addOfferFailure,
+
   updateOfferSuccess,
   updateOfferFailure,
+
   deleteOfferSuccess,
   deleteOfferFailure,
+
 } from "./OffersActions";
 
-const fetchOffersApi = async () => {
+/////////////////////////////////////////////////////////
+// API METHODS
+/////////////////////////////////////////////////////////
+
+const getOffersApi = async () => {
+
   const response = await axios.get(OFFERS);
-  console.log(response)
-  return response.data;
-};
-
-const addOfferApi = async (payload) => {
-  const response = await axios.post(OFFERS, payload, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
 
   return response.data;
+
 };
 
-const updateOfferApi = async (payload) => {
-  const { id, formData } = payload;
+const getOfferApi = async (id) => {
 
-  const response = await axios.put(`${OFFERS}/${id}`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await axios.get(`${OFFERS}/${id}`);
 
   return response.data;
+
 };
 
-const deleteOfferApi = async (id) => {
-  const response = await axios.delete(`${OFFERS}/${id}`);
+const addOfferApi = async (formData) => {
+
+  const response = await axios.post(
+
+    OFFERS,
+
+    formData,
+
+    {
+
+      headers:{
+
+        "Content-Type":"multipart/form-data"
+
+      }
+
+    }
+
+  );
+
   return response.data;
+
 };
 
-function* fetchOffersSaga() {
-  try {
-    console.log("🔥 FETCH OFFERS API URL:", OFFERS);
+const updateOfferApi = async ({id,formData}) => {
 
-    const response = yield call(fetchOffersApi);
+  const response = await axios.put(
 
-    console.log("🔥 OFFERS API FULL RESPONSE:", response);
+    `${OFFERS}/${id}`,
 
-    const data =
-      response?.data ||
-      response?.offers ||
-      response?.results ||
-      response ||
-      [];
+    formData,
 
-    console.log("🔥 OFFERS RAW DATA:", data);
+    {
 
-    const finalData = Array.isArray(data)
-      ? data.map((item, index) => {
-          console.log(`🔥 OFFER ITEM ${index}:`, item);
-          console.log(`🔥 OFFER ITEM ${index} GENDER:`, item?.gender);
+      headers:{
 
-          return {
-            ...item,
-          
-          };
-        })
-      : [];
+        "Content-Type":"multipart/form-data"
 
-    console.log("🔥 OFFERS FINAL DATA WITH GENDER:", finalData);
+      }
 
-    yield put(offersFetchSuccess(finalData));
-  } catch (error) {
-    console.log("❌ FETCH OFFERS ERROR:", error);
-    console.log("❌ FETCH OFFERS ERROR RESPONSE:", error?.response?.data);
+    }
 
-    yield put(
-      offersFetchFailure(
-        error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          "Unable to fetch offers"
-      )
+  );
+
+  return response.data;
+
+};
+
+const deleteOfferApi = async(id)=>{
+
+    const response=await axios.delete(
+
+        `${OFFERS}/${id}`
+
     );
-  }
+
+    return response.data;
+
+};
+
+/////////////////////////////////////////////////////////
+// FETCH OFFERS
+/////////////////////////////////////////////////////////
+
+function* fetchOffersSaga(){
+
+try{
+
+const response=yield call(getOffersApi);
+
+yield put(
+
+fetchOffersSuccess(
+
+response.data || []
+
+)
+
+);
+
+}catch(error){
+
+yield put(
+
+fetchOffersFailure(
+
+error.response?.data?.message ||
+
+error.message
+
+)
+
+);
+
 }
 
-function* addOfferSaga(action) {
-  try {
-    console.log("🔥 ADD OFFER PAYLOAD:", action.payload);
-
-    const response = yield call(addOfferApi, action.payload);
-
-    console.log("✅ ADD OFFER RESPONSE:", response);
-
-    yield put(addOfferSuccess(response));
-    yield put({ type: FETCH_OFFERS_REQUEST });
-  } catch (error) {
-    console.log("❌ ADD OFFER ERROR:", error);
-    console.log("❌ ADD OFFER ERROR RESPONSE:", error?.response?.data);
-
-    yield put(
-      addOfferFailure(
-        error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          "Unable to add offer"
-      )
-    );
-  }
 }
 
-function* updateOfferSaga(action) {
-  try {
-    console.log("🔥 UPDATE OFFER PAYLOAD:", action.payload);
+/////////////////////////////////////////////////////////
+// FETCH SINGLE OFFER
+/////////////////////////////////////////////////////////
 
-    const response = yield call(updateOfferApi, action.payload);
+function* fetchOfferSaga(action){
 
-    console.log("✅ UPDATE OFFER RESPONSE:", response);
+try{
 
-    yield put(updateOfferSuccess(response));
-    yield put({ type: FETCH_OFFERS_REQUEST });
-  } catch (error) {
-    console.log("❌ UPDATE OFFER ERROR:", error);
-    console.log("❌ UPDATE OFFER ERROR RESPONSE:", error?.response?.data);
+const response=yield call(
 
-    yield put(
-      updateOfferFailure(
-        error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          "Unable to update offer"
-      )
-    );
-  }
+getOfferApi,
+
+action.payload
+
+);
+
+yield put(
+
+fetchOfferSuccess(
+
+response.data
+
+)
+
+);
+
+}catch(error){
+
+yield put(
+
+fetchOfferFailure(
+
+error.response?.data?.message ||
+
+error.message
+
+)
+
+);
+
 }
 
-function* deleteOfferSaga(action) {
-  try {
-    console.log("🔥 DELETE OFFER ID:", action.payload);
-
-    const response = yield call(deleteOfferApi, action.payload);
-
-    console.log("✅ DELETE OFFER RESPONSE:", response);
-
-    yield put(deleteOfferSuccess(response));
-    yield put({ type: FETCH_OFFERS_REQUEST });
-  } catch (error) {
-    console.log("❌ DELETE OFFER ERROR:", error);
-    console.log("❌ DELETE OFFER ERROR RESPONSE:", error?.response?.data);
-
-    yield put(
-      deleteOfferFailure(
-        error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          "Unable to delete offer"
-      )
-    );
-  }
 }
 
-export function* watchOffersSaga() {
-  yield takeLatest(FETCH_OFFERS_REQUEST, fetchOffersSaga);
-  yield takeLatest(ADD_OFFER_REQUEST, addOfferSaga);
-  yield takeLatest(UPDATE_OFFER_REQUEST, updateOfferSaga);
-  yield takeLatest(DELETE_OFFER_REQUEST, deleteOfferSaga);
+/////////////////////////////////////////////////////////
+// ADD OFFER
+/////////////////////////////////////////////////////////
+
+function* addOfferSaga(action){
+
+try{
+
+const response=yield call(
+
+addOfferApi,
+
+action.payload
+
+);
+
+yield put(
+
+addOfferSuccess(
+
+response.data
+
+)
+
+);
+
+yield put({
+
+type:types.FETCH_OFFERS_REQUEST
+
+});
+
+}catch(error){
+
+yield put(
+
+addOfferFailure(
+
+error.response?.data?.message ||
+
+error.message
+
+)
+
+);
+
+}
+
+}
+
+/////////////////////////////////////////////////////////
+// UPDATE OFFER
+/////////////////////////////////////////////////////////
+
+function* updateOfferSaga(action){
+
+try{
+
+const response=yield call(
+
+updateOfferApi,
+
+action.payload
+
+);
+
+yield put(
+
+updateOfferSuccess(
+
+response.data
+
+)
+
+);
+
+yield put({
+
+type:types.FETCH_OFFERS_REQUEST
+
+});
+
+}catch(error){
+
+yield put(
+
+updateOfferFailure(
+
+error.response?.data?.message ||
+
+error.message
+
+)
+
+);
+
+}
+
+}
+
+/////////////////////////////////////////////////////////
+// DELETE OFFER
+/////////////////////////////////////////////////////////
+
+function* deleteOfferSaga(action){
+
+try{
+
+const response=yield call(
+
+deleteOfferApi,
+
+action.payload
+
+);
+
+yield put(
+
+deleteOfferSuccess(
+
+response.data
+
+)
+
+);
+
+yield put({
+
+type:types.FETCH_OFFERS_REQUEST
+
+});
+
+}catch(error){
+
+yield put(
+
+deleteOfferFailure(
+
+error.response?.data?.message ||
+
+error.message
+
+)
+
+);
+
+}
+
+}
+
+/////////////////////////////////////////////////////////
+// WATCHER
+/////////////////////////////////////////////////////////
+
+export function* watchOffersSaga(){
+
+yield takeLatest(
+
+types.FETCH_OFFERS_REQUEST,
+
+fetchOffersSaga
+
+);
+
+yield takeLatest(
+
+types.FETCH_OFFER_REQUEST,
+
+fetchOfferSaga
+
+);
+
+yield takeLatest(
+
+types.ADD_OFFER_REQUEST,
+
+addOfferSaga
+
+);
+
+yield takeLatest(
+
+types.UPDATE_OFFER_REQUEST,
+
+updateOfferSaga
+
+);
+
+yield takeLatest(
+
+types.DELETE_OFFER_REQUEST,
+
+deleteOfferSaga
+
+);
+
 }

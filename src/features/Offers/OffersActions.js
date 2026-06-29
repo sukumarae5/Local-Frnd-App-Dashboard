@@ -1,92 +1,79 @@
-import {
-  FETCH_OFFERS_REQUEST,
-  FETCH_OFFERS_SUCCESS,
-  FETCH_OFFERS_FAILURE,
-  ADD_OFFER_REQUEST,
-  ADD_OFFER_SUCCESS,
-  ADD_OFFER_FAILURE,
-  RESET_ADD_OFFER_STATE,
-  UPDATE_OFFER_REQUEST,
-  UPDATE_OFFER_SUCCESS,
-  UPDATE_OFFER_FAILURE,
-  RESET_UPDATE_OFFER_STATE,
-  DELETE_OFFER_REQUEST,
-  DELETE_OFFER_SUCCESS,
-  DELETE_OFFER_FAILURE,
-  RESET_DELETE_OFFER_STATE,
-} from "./OffersType";
+import * as types from "./OffersType";
 
-// fetch
-export const offersFetchRequest = () => ({
-  type: FETCH_OFFERS_REQUEST,
+export const fetchOffersRequest = () => ({
+    type: types.FETCH_OFFERS_REQUEST
 });
 
-export const offersFetchSuccess = (payload) => ({
-  type: FETCH_OFFERS_SUCCESS,
-  payload,
+export const fetchOffersSuccess = (payload) => ({
+    type: types.FETCH_OFFERS_SUCCESS,
+    payload
 });
 
-export const offersFetchFailure = (payload) => ({
-  type: FETCH_OFFERS_FAILURE,
-  payload,
+export const fetchOffersFailure = (payload) => ({
+    type: types.FETCH_OFFERS_FAILURE,
+    payload
 });
 
-// add
-export const addOfferRequest = (payload) => ({
-  type: ADD_OFFER_REQUEST,
-  payload,
+export const fetchOfferRequest = (id) => ({
+    type: types.FETCH_OFFER_REQUEST,
+    payload:id
 });
 
-export const addOfferSuccess = (payload) => ({
-  type: ADD_OFFER_SUCCESS,
-  payload,
+export const fetchOfferSuccess = (payload) => ({
+    type: types.FETCH_OFFER_SUCCESS,
+    payload
 });
 
-export const addOfferFailure = (payload) => ({
-  type: ADD_OFFER_FAILURE,
-  payload,
+export const fetchOfferFailure = (payload) => ({
+    type: types.FETCH_OFFER_FAILURE,
+    payload
 });
 
-export const resetAddOfferState = () => ({
-  type: RESET_ADD_OFFER_STATE,
+export const addOfferRequest = (payload)=>({
+    type:types.ADD_OFFER_REQUEST,
+    payload
 });
 
-// update
-export const updateOfferRequest = (payload) => ({
-  type: UPDATE_OFFER_REQUEST,
-  payload,
+export const addOfferSuccess=(payload)=>({
+    type:types.ADD_OFFER_SUCCESS,
+    payload
 });
 
-export const updateOfferSuccess = (payload) => ({
-  type: UPDATE_OFFER_SUCCESS,
-  payload,
+export const addOfferFailure=(payload)=>({
+    type:types.ADD_OFFER_FAILURE,
+    payload
 });
 
-export const updateOfferFailure = (payload) => ({
-  type: UPDATE_OFFER_FAILURE,
-  payload,
+export const updateOfferRequest=(payload)=>({
+    type:types.UPDATE_OFFER_REQUEST,
+    payload
 });
 
-export const resetUpdateOfferState = () => ({
-  type: RESET_UPDATE_OFFER_STATE,
+export const updateOfferSuccess=(payload)=>({
+    type:types.UPDATE_OFFER_SUCCESS,
+    payload
 });
 
-// delete
-export const deleteOfferRequest = (payload) => ({
-  type: DELETE_OFFER_REQUEST,
-  payload,
+export const updateOfferFailure=(payload)=>({
+    type:types.UPDATE_OFFER_FAILURE,
+    payload
 });
 
-export const deleteOfferSuccess = (payload) => ({
-  type: DELETE_OFFER_SUCCESS,
-  payload,
+export const deleteOfferRequest=(id)=>({
+    type:types.DELETE_OFFER_REQUEST,
+    payload:id
 });
 
-export const deleteOfferFailure = (payload) => ({
-  type: DELETE_OFFER_FAILURE,
-  payload,
+export const deleteOfferSuccess=(payload)=>({
+    type:types.DELETE_OFFER_SUCCESS,
+    payload
 });
 
-export const resetDeleteOfferState = () => ({
-  type: RESET_DELETE_OFFER_STATE,
+export const deleteOfferFailure=(payload)=>({
+    type:types.DELETE_OFFER_FAILURE,
+    payload
+});
+
+export const resetOfferState=()=>({
+    type:types.RESET_OFFER_STATE
 });
