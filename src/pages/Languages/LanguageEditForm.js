@@ -76,12 +76,12 @@ const LanguageEditForm = () => {
 
     // ✅ after save navigate back
     // (If you want to wait for success, we can do that too)
-    navigate("/languagepage");
+    navigate("/dashboard/languagepage");
 };
 
   // ✅ Cancel
 const handleCancel = () => {
-    navigate("/languagepage");
+    navigate("/dashboard/languagepage");
 };
 
 return (

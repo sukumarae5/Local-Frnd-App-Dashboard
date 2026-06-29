@@ -1,162 +1,175 @@
-import {
-  FETCH_OFFERS_REQUEST,
-  FETCH_OFFERS_SUCCESS,
-  FETCH_OFFERS_FAILURE,
-  ADD_OFFER_REQUEST,
-  ADD_OFFER_SUCCESS,
-  ADD_OFFER_FAILURE,
-  RESET_ADD_OFFER_STATE,
-  UPDATE_OFFER_REQUEST,
-  UPDATE_OFFER_SUCCESS,
-  UPDATE_OFFER_FAILURE,
-  RESET_UPDATE_OFFER_STATE,
-  DELETE_OFFER_REQUEST,
-  DELETE_OFFER_SUCCESS,
-  DELETE_OFFER_FAILURE,
-  RESET_DELETE_OFFER_STATE,
-} from "./OffersType";
+import * as types from "./OffersType";
 
 const initialState = {
-  loading: false,
-  offers: [],
-  error: "",
 
-  addLoading: false,
-  addSuccess: false,
-  addError: "",
+    loading:false,
 
-  updateLoading: false,
-  updateSuccess: false,
-  updateError: "",
+    saving:false,
 
-  deleteLoading: false,
-  deleteSuccess: false,
-  deleteError: "",
+    deleting:false,
+
+    offers:[],
+
+    selectedOffer:null,
+
+    success:false,
+
+    error:null
+
 };
 
-const offersReducer = (state = initialState, action) => {
-  switch (action.type) {
-    case FETCH_OFFERS_REQUEST:
-      return {
-        ...state,
-        loading: true,
-        error: "",
-      };
+const OffersReducer=(state=initialState,action)=>{
 
-    case FETCH_OFFERS_SUCCESS:
-      return {
-        ...state,
-        loading: false,
-        offers: Array.isArray(action.payload) ? action.payload : [],
-        error: "",
-      };
+switch(action.type){
 
-    case FETCH_OFFERS_FAILURE:
-      return {
-        ...state,
-        loading: false,
-        error: action.payload || "Failed to fetch offers",
-      };
+case types.FETCH_OFFERS_REQUEST:
 
-    case ADD_OFFER_REQUEST:
-      return {
-        ...state,
-        addLoading: true,
-        addSuccess: false,
-        addError: "",
-      };
+return{
 
-    case ADD_OFFER_SUCCESS:
-      return {
-        ...state,
-        addLoading: false,
-        addSuccess: true,
-        addError: "",
-      };
+...state,
 
-    case ADD_OFFER_FAILURE:
-      return {
-        ...state,
-        addLoading: false,
-        addSuccess: false,
-        addError: action.payload || "Failed to add offer",
-      };
+loading:true,
 
-    case RESET_ADD_OFFER_STATE:
-      return {
-        ...state,
-        addLoading: false,
-        addSuccess: false,
-        addError: "",
-      };
+error:null
 
-    case UPDATE_OFFER_REQUEST:
-      return {
-        ...state,
-        updateLoading: true,
-        updateSuccess: false,
-        updateError: "",
-      };
-
-    case UPDATE_OFFER_SUCCESS:
-      return {
-        ...state,
-        updateLoading: false,
-        updateSuccess: true,
-        updateError: "",
-      };
-
-    case UPDATE_OFFER_FAILURE:
-      return {
-        ...state,
-        updateLoading: false,
-        updateSuccess: false,
-        updateError: action.payload || "Failed to update offer",
-      };
-
-    case RESET_UPDATE_OFFER_STATE:
-      return {
-        ...state,
-        updateLoading: false,
-        updateSuccess: false,
-        updateError: "",
-      };
-
-    case DELETE_OFFER_REQUEST:
-      return {
-        ...state,
-        deleteLoading: true,
-        deleteSuccess: false,
-        deleteError: "",
-      };
-
-    case DELETE_OFFER_SUCCESS:
-      return {
-        ...state,
-        deleteLoading: false,
-        deleteSuccess: true,
-        deleteError: "",
-      };
-
-    case DELETE_OFFER_FAILURE:
-      return {
-        ...state,
-        deleteLoading: false,
-        deleteSuccess: false,
-        deleteError: action.payload || "Failed to delete offer",
-      };
-
-    case RESET_DELETE_OFFER_STATE:
-      return {
-        ...state,
-        deleteLoading: false,
-        deleteSuccess: false,
-        deleteError: "",
-      };
-
-    default:
-      return state;
-  }
 };
 
-export default offersReducer;
+case types.FETCH_OFFERS_SUCCESS:
+
+return{
+
+...state,
+
+loading:false,
+
+offers:action.payload,
+
+error:null
+
+};
+
+case types.FETCH_OFFERS_FAILURE:
+
+return{
+
+...state,
+
+loading:false,
+
+error:action.payload
+
+};
+
+case types.FETCH_OFFER_SUCCESS:
+
+return{
+
+...state,
+
+loading:false,
+
+selectedOffer:action.payload
+
+};
+
+case types.ADD_OFFER_REQUEST:
+
+case types.UPDATE_OFFER_REQUEST:
+
+return{
+
+...state,
+
+saving:true,
+
+success:false
+
+};
+
+case types.ADD_OFFER_SUCCESS:
+
+case types.UPDATE_OFFER_SUCCESS:
+
+return{
+
+...state,
+
+saving:false,
+
+success:true
+
+};
+
+case types.ADD_OFFER_FAILURE:
+
+case types.UPDATE_OFFER_FAILURE:
+
+return{
+
+...state,
+
+saving:false,
+
+error:action.payload
+
+};
+
+case types.DELETE_OFFER_REQUEST:
+
+return{
+
+...state,
+
+deleting:true
+
+};
+
+case types.DELETE_OFFER_SUCCESS:
+
+return{
+
+...state,
+
+deleting:false,
+
+success:true
+
+};
+
+case types.DELETE_OFFER_FAILURE:
+
+return{
+
+...state,
+
+deleting:false,
+
+error:action.payload
+
+};
+
+case types.RESET_OFFER_STATE:
+
+return{
+
+...state,
+
+saving:false,
+
+deleting:false,
+
+success:false,
+
+error:null
+
+};
+
+default:
+
+return state;
+
+}
+
+};
+
+export default OffersReducer;
